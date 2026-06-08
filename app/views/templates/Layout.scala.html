@@ -14,58 +14,236 @@
  * limitations under the License.
  *@
 
-@import config.FrontendAppConfig
-@import uk.gov.hmrc.hmrcfrontend.views.config.StandardAlphaBanner
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
-@import uk.gov.hmrc.hmrcfrontend.views.html.components._
-@import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
+@import views.html.helper.CSPNonce
 
-@this(
-    appConfig: FrontendAppConfig,
-    hmrcTimeoutDialog: HmrcTimeoutDialog,
-    hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
-    alphaBanner: StandardAlphaBanner,
-    hmrcStandardPage: HmrcStandardPage
-)
-
+@this()
 @(pageTitle: String, showBackLink: Boolean = true, timeout: Boolean = true, showSignOut: Boolean = true, showHmrcBanner: Boolean = false)(contentBlock: Html)(implicit rh: RequestHeader, messages: Messages)
 
-@head = {
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>MDTP - @pageTitle</title>
 
-    @if(timeout) {
-        @hmrcTimeoutDialog(TimeoutDialog(
-            timeout             = Some(appConfig.timeout),
-            countdown           = Some(appConfig.countdown),
-            keepAliveUrl        = Some(routes.KeepAliveController.keepAlive().url),
-            keepAliveButtonText = Some(messages("timeout.keepAlive")),
-            signOutUrl          = Some(controllers.auth.routes.AuthController.signOut().url),
-            signOutButtonText   = Some(messages("timeout.signOut")),
-            title               = Some(messages("timeout.title")),
-            message             = Some(messages("timeout.message")),
-            language            = Some(messages.lang.code)
-        ))
-    }
-}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-@content = {
-    @contentBlock
-    @hmrcReportTechnicalIssueHelper()
-}
+    <link
+      rel="stylesheet"
+      media="all"
+      href="@routes.Assets.versioned("bootstrap.5.3.0.min.css")"
+    />
 
-@hmrcStandardPage(HmrcStandardPageParams(
-    pageTitle = Some(pageTitle),
-    templateOverrides = TemplateOverrides(
-        additionalHeadBlock = Some(head)
-    ),
-    serviceURLs = ServiceURLs(
-        serviceUrl = Some(routes.IndexController.onPageLoad().url),
-        signOutUrl = if(showSignOut) Some(controllers.auth.routes.AuthController.signOut().url) else None
-    ),
-    banners = Banners(
-        displayHmrcBanner = showHmrcBanner,
-        phaseBanner = Some(alphaBanner(appConfig.feedbackUrl))
-    ),
-    isWelshTranslationAvailable = appConfig.languageTranslationEnabled,
-    backLink = if (showBackLink) Some(BackLink.mimicsBrowserBackButtonViaJavaScript) else None
-))(content)
+    <link
+      rel="stylesheet"
+      media="all"
+      href="@routes.Assets.versioned("bootstrap-icons.min.css")"
+    />
+
+    <link
+      rel="stylesheet"
+      media="all"
+      href="@routes.Assets.versioned("catalogue-frontend.css")"
+    />
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-black">
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          MDTP
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#main-menu"
+          aria-controls="main-menu"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="main-menu">
+          <ul id="main-menu-bar" class="navbar-nav me-auto mb-2 mb-md-0">
+
+            <li class="nav-item">
+              <a class="nav-link" href="/users">Users</a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" href="/teams">Teams</a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" href="/repositories">Repositories</a>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a
+                id="deployments-dropdown"
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Deployments
+              </a>
+
+              <ul class="dropdown-menu" aria-labelledby="deployments-dropdown">
+                <li><a class="dropdown-item" href="/deploy-service">Deploy Service</a></li>
+                <li><a class="dropdown-item" href="/deployment-events">Events</a></li>
+                <li><a class="dropdown-item" href="/deployment-timeline">Timeline</a></li>
+                <li><a class="dropdown-item" href="/whats-running-where">What's Running Where</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a
+                id="shuttering-dropdown"
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Shuttering
+              </a>
+
+              <ul class="dropdown-menu" aria-labelledby="shuttering-dropdown">
+                <li><a class="dropdown-item" href="/shutter-overview/frontend">Shutter Overview - Frontend</a></li>
+                <li><a class="dropdown-item" href="/shutter-overview/api">Shutter Overview - Api</a></li>
+                <li><a class="dropdown-item" href="/shutter-overview/rate">Shutter Overview - Rate</a></li>
+                <li><a class="dropdown-item" href="/shutter-events">Shutter Events</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a
+                id="health-dropdown"
+                class="nav-link dropdown-toggle active"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Health
+              </a>
+
+              <ul class="dropdown-menu" aria-labelledby="health-dropdown">
+                <li><a class="dropdown-item" href="/platform-initiatives">Platform Initiatives</a></li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li><a class="dropdown-item" href="/bobby/rules">Bobby Rules</a></li>
+                <li><a class="dropdown-item" href="/bobby/violations">Bobby Violations</a></li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li><a class="dropdown-item" href="/leak-detection/rules">Leak Detection - Rules</a></li>
+                <li><a class="dropdown-item" href="/leak-detection/repositories">Leak Detection - Repositories</a></li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li><a class="dropdown-item" href="/vulnerabilities">Vulnerabilities</a></li>
+                <li><a class="dropdown-item" href="/vulnerabilities/services">Vulnerabilities - Services</a></li>
+                <li><a class="dropdown-item" href="/vulnerabilities/timeline">Vulnerabilities - Timeline</a></li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li><a class="dropdown-item" href="/pr-commenter/recommendations">PR-Commenter Recommendations</a></li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li><a class="dropdown-item" href="/health-metrics/timeline">Health Metrics - Timeline</a></li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li>
+                  <a class="dropdown-item active" href="@routes.IndexController.onPageLoad()">
+                    Operational Metrics
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a
+                id="explore-dropdown"
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Explore
+              </a>
+
+              <ul class="dropdown-menu" aria-labelledby="explore-dropdown">
+                <li><a class="dropdown-item" href="/dependency-explorer">Dependency Explorer</a></li>
+                <li><a class="dropdown-item" href="/jdk-explorer">JDK Explorer</a></li>
+                <li><a class="dropdown-item" href="/sbt-explorer">SBT Explorer</a></li>
+                <li><a class="dropdown-item" href="/search-by-url">Search by URL</a></li>
+                <li><a class="dropdown-item" href="/search-config">Search Config</a></li>
+                <li><a class="dropdown-item" href="/search-commissioning-state">Search Commissioning State</a></li>
+                <li><a class="dropdown-item" href="/service-metrics">Service Metrics</a></li>
+                <li><a class="dropdown-item" href="/test-results">Test Results</a></li>
+                <li><a class="dropdown-item" href="/config-warnings">Config Warnings</a></li>
+                <li><a class="dropdown-item" href="/cost-explorer">Cost Explorer</a></li>
+                <li><a class="dropdown-item" href="/service-provision">Service Provision</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a
+                id="docs-dropdown"
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Docs
+              </a>
+
+              <ul class="dropdown-menu" aria-labelledby="docs-dropdown">
+                <li>
+                  <a class="dropdown-item" href="https://docs.tax.service.gov.uk/mdtp-handbook/" target="_blank" rel="noreferrer noopener">
+                    MDTP Handbook
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="https://confluence.tools.tax.service.gov.uk/display/MDTPK/Blog+Posts" target="_blank" rel="noreferrer noopener">
+                    Blog Posts
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+
+          @if(showSignOut) {
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" href="@controllers.auth.routes.AuthController.signOutNoSurvey()">
+                  Sign out
+                </a>
+              </li>
+            </ul>
+          }
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div id="standard-layout-container">
+        <section class="container mt-4">
+          @contentBlock
+        </section>
+      </div>
+    </main>
+    <script @{CSPNonce.attr} src="@routes.Assets.versioned("popper.2.11.8.min.js")"></script>
+    <script @{CSPNonce.attr} src="@routes.Assets.versioned("bootstrap.5.3.0.min.js")"></script>
+  </body>
+</html>

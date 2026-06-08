@@ -20,4 +20,3 @@ GET         /account/signed-out                          controllers.auth.Signed
 
 GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad()
 
-GET         /operational-metrics                         controllers.OperationalMetricsController.showMetrics()

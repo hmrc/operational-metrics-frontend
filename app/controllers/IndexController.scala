@@ -16,20 +16,41 @@
 
 package controllers
 
+import connector.OperationalMetricsConnector
 import controllers.actions.IdentifierAction
 import javax.inject.Inject
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import viewmodels.ServiceLeadTimesViewModel
 import views.html.IndexView
 
-class IndexController @Inject()(
-                                 val controllerComponents: MessagesControllerComponents,
-                                 identify: IdentifierAction,
-                                 view: IndexView
-                               ) extends FrontendBaseController with I18nSupport {
+import scala.concurrent.ExecutionContext
 
-  def onPageLoad(): Action[AnyContent] = identify { implicit request =>
-    Ok(view())
-  }
+class IndexController @Inject()(
+    val controllerComponents: MessagesControllerComponents,
+    identify: IdentifierAction,
+    connector: OperationalMetricsConnector,
+    view: IndexView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
+
+  def onPageLoad(): Action[AnyContent] =
+    identify.async { implicit request =>
+      implicit val hc: HeaderCarrier =
+        HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+
+      val selectedTeam: Option[String] =
+        request.getQueryString("team").filter(_.nonEmpty)
+
+      connector.getServiceLeadTimes().map { serviceLeadTimes =>
+        val viewModel =
+          ServiceLeadTimesViewModel.from(serviceLeadTimes, selectedTeam)
+
+        Ok(view(viewModel))
+      }
+    }
 }
