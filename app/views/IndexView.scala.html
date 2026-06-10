@@ -20,11 +20,13 @@
     layout: templates.Layout
 )
 
-@(viewModel: viewmodels.ServiceLeadTimesViewModel)(implicit request: Request[_], messages: Messages)
+@(viewModel: viewmodels.ServiceLeadTimesViewModel, bannerMenu: models.BannerMenu)(implicit request: Request[_], messages: Messages)
 
 @layout(
     pageTitle    = "Operational Metrics",
-    showBackLink = false
+    showBackLink = false,
+    bannerMenu   = Some(bannerMenu),
+    activeItemId = Some("oerational-metrics")
 ) {
 
   <div class="row">

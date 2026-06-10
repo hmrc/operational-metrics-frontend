@@ -16,7 +16,7 @@
 
 package controllers
 
-import connector.OperationalMetricsConnector
+import connector.{MenuBarConnector, OperationalMetricsConnector}
 import controllers.actions.IdentifierAction
 import javax.inject.Inject
 import play.api.i18n.I18nSupport
@@ -32,7 +32,8 @@ import scala.concurrent.ExecutionContext
 class IndexController @Inject()(
     val controllerComponents: MessagesControllerComponents,
     identify: IdentifierAction,
-    connector: OperationalMetricsConnector,
+    operationalMetricsConnector: OperationalMetricsConnector,
+    menuBarConnector: MenuBarConnector,
     view: IndexView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
@@ -46,11 +47,15 @@ class IndexController @Inject()(
       val selectedTeam: Option[String] =
         request.getQueryString("team").filter(_.nonEmpty)
 
-      connector.getServiceLeadTimes().map { serviceLeadTimes =>
+      for {
+        serviceLeadTimes <- operationalMetricsConnector.getServiceLeadTimes()
+        bannerMenu       <- menuBarConnector.getMenu()
+      } yield {
+
         val viewModel =
           ServiceLeadTimesViewModel.from(serviceLeadTimes, selectedTeam)
 
-        Ok(view(viewModel))
+        Ok(view(viewModel, bannerMenu))
       }
     }
 }
