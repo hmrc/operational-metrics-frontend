@@ -17,7 +17,8 @@
 package controllers
 
 import base.SpecBase
-import connector.OperationalMetricsConnector
+import connector.{MenuBarConnector, OperationalMetricsConnector}
+import models.{BannerMenu, MenuLink}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.inject.bind
@@ -29,15 +30,27 @@ import scala.concurrent.Future
 
 class IndexControllerSpec extends SpecBase {
 
+  private val emptyMenu = BannerMenu(
+    brand         = MenuLink("brand", "MDTP", "/"),
+    topLevelLinks = Seq.empty,
+    dropdowns     = Seq.empty
+  )
+
   "IndexController.onPageLoad" - {
 
     "must return OK and render service lead time data" in {
-      val mockConnector = mock[OperationalMetricsConnector]
-      when(mockConnector.getServiceLeadTimes()(any[HeaderCarrier])) thenReturn Future.successful(serviceLeadTimes)
+      val mockOperationalMetricsConnector = mock[OperationalMetricsConnector]
+      when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier])) thenReturn Future.successful(serviceLeadTimes)
+
+      val mockMenuBarConnector = mock[MenuBarConnector]
+      when(mockMenuBarConnector.getMenu()(any[HeaderCarrier])) thenReturn Future.successful(emptyMenu)
 
       val application =
         applicationBuilder()
-          .overrides(bind[OperationalMetricsConnector].toInstance(mockConnector))
+          .overrides(
+            bind[OperationalMetricsConnector].toInstance(mockOperationalMetricsConnector),
+            bind[MenuBarConnector].toInstance(mockMenuBarConnector)
+          )
           .build()
 
       running(application) {
@@ -52,12 +65,18 @@ class IndexControllerSpec extends SpecBase {
     }
 
     "must pass the selected team query parameter into the view model" in {
-      val mockConnector = mock[OperationalMetricsConnector]
-      when(mockConnector.getServiceLeadTimes()(any[HeaderCarrier])) thenReturn Future.successful(serviceLeadTimes)
+      val mockOperationalMetricsConnector = mock[OperationalMetricsConnector]
+      when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier])) thenReturn Future.successful(serviceLeadTimes)
+
+      val mockMenuBarConnector = mock[MenuBarConnector]
+      when(mockMenuBarConnector.getMenu()(any[HeaderCarrier])) thenReturn Future.successful(emptyMenu)
 
       val application =
         applicationBuilder()
-          .overrides(bind[OperationalMetricsConnector].toInstance(mockConnector))
+          .overrides(
+            bind[OperationalMetricsConnector].toInstance(mockOperationalMetricsConnector),
+            bind[MenuBarConnector].toInstance(mockMenuBarConnector)
+          )
           .build()
 
       running(application) {

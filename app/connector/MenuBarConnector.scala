@@ -16,7 +16,7 @@
 
 package connector
 
-import models.BannerMenu
+import models.{BannerMenu, SearchTerm}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -38,4 +38,9 @@ class MenuBarConnector @Inject()(
     httpClient
       .get(url"$baseUrl/menu-bar/menu")
       .execute[BannerMenu]
+
+  def search(query: String, limit: Int = 20)(implicit hc: HeaderCarrier): Future[Seq[SearchTerm]] =
+    httpClient
+      .get(url"$baseUrl/menu-bar/quicksearch?query=$query&limit=$limit")
+      .execute[Seq[SearchTerm]]
 }
