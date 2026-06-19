@@ -14,14 +14,9 @@
  * limitations under the License.
  *@
 
-@this(
-    layout: templates.Layout
-)
+@this()
 
 @(pageTitle: String, heading: String, message: String)(implicit rh: RequestHeader, messages: Messages)
 
-@layout(pageTitle = titleNoForm(pageTitle)) {
-    <h1 class="govuk-heading-xl">@messages(heading)</h1>
-
-    <p class="govuk-body">@messages(message)</p>
-}
+<h1 class="govuk-heading-xl">@messages(heading)</h1>
+<p class="govuk-body">@messages(message)</p>
