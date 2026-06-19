@@ -1,5 +1,7 @@
 # microservice specific routes
 
+->          /catalogue-wrapper                           cataloguewrapper.Routes
+
 GET         /                                            controllers.IndexController.onPageLoad()
 
 GET         /quicksearch                                 controllers.QuickSearchController.search(query: String, limit: Int ?= 20)

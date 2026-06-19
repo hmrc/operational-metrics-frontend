@@ -16,11 +16,12 @@
 
 package controllers
 
-import connector.{MenuBarConnector, OperationalMetricsConnector}
+import connector.{OperationalMetricsConnector}
 import controllers.actions.IdentifierAction
 import javax.inject.Inject
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.cataloguewrapper.services.CatalogueWrapperService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -33,7 +34,7 @@ class IndexController @Inject()(
     val controllerComponents: MessagesControllerComponents,
     identify: IdentifierAction,
     operationalMetricsConnector: OperationalMetricsConnector,
-    menuBarConnector: MenuBarConnector,
+    catalogueWrapperService: CatalogueWrapperService,
     view: IndexView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
@@ -49,13 +50,16 @@ class IndexController @Inject()(
 
       for {
         serviceLeadTimes <- operationalMetricsConnector.getServiceLeadTimes()
-        bannerMenu       <- menuBarConnector.getMenu()
+        pageContent      = view(ServiceLeadTimesViewModel.from(serviceLeadTimes, selectedTeam))
+        html             <- catalogueWrapperService.standardCatalogueLayout(
+          content      = pageContent,
+          pageTitle    = Some("Operational Metrics"),
+          activeItemId = Some("operational-metrics"),
+          fullWidth    = false,
+          signOutUrl   = None // TODO: Need to wire in the signout
+          )
       } yield {
-
-        val viewModel =
-          ServiceLeadTimesViewModel.from(serviceLeadTimes, selectedTeam)
-
-        Ok(view(viewModel, bannerMenu))
+        Ok(html)
       }
     }
 }
