@@ -18,19 +18,12 @@ package views
 
 import base.SpecBase
 import controllers.routes
-import models.{BannerMenu, MenuLink}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import viewmodels.ServiceLeadTimesViewModel
 import views.html.IndexView
 
 class IndexViewSpec extends SpecBase {
-
-  private val emptyMenu = BannerMenu(
-    brand         = MenuLink("brand", "MDTP", "/"),
-    topLevelLinks = Seq.empty,
-    dropdowns     = Seq.empty
-  )
 
   "IndexView" - {
 
@@ -42,7 +35,7 @@ class IndexViewSpec extends SpecBase {
         val request = FakeRequest(GET, routes.IndexController.onPageLoad().url)
         val viewModel = ServiceLeadTimesViewModel.from(serviceLeadTimes, None)
 
-        val html = view(viewModel, emptyMenu)(request, messages(application)).body
+        val html = view(viewModel)(request, messages(application)).body
 
         html must include("Operational Metrics")
         html must include("Service lead times")
@@ -62,7 +55,7 @@ class IndexViewSpec extends SpecBase {
         val request = FakeRequest(GET, routes.IndexController.onPageLoad().url + "?team=PlatOps")
         val viewModel = ServiceLeadTimesViewModel.from(serviceLeadTimes, Some("PlatOps"))
 
-        val html = view(viewModel, emptyMenu)(request, messages(application)).body
+        val html = view(viewModel)(request, messages(application)).body
 
         html must include("PlatOps")
         html must include("Clear filters")

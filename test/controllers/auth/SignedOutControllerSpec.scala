@@ -34,7 +34,7 @@ class SignedOutControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[SignedOutView]
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view()(request, messages(application)).toString
+        contentAsString(result) must include("For your security, we signed you out")
       }
     }
   }

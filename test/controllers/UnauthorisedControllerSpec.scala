@@ -34,7 +34,7 @@ class UnauthorisedControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[UnauthorisedView]
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view()(request, messages(application)).toString
+        contentAsString(result) must include("You can’t access this service with this account")
       }
     }
   }

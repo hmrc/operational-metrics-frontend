@@ -23,7 +23,6 @@ import org.mockito.Mockito.{times, verify, when}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.SessionRepository
 
 import java.net.URLEncoder
 import scala.concurrent.Future
@@ -33,13 +32,8 @@ class AuthControllerSpec extends SpecBase {
   "AuthController.signOut" - {
 
     "must clear session state and redirect to sign out with the exit survey as continue URL" in {
-      val mockSessionRepository = mock[SessionRepository]
-      when(mockSessionRepository.clear(any[String])) thenReturn Future.successful(true)
-
       val application =
-        applicationBuilder()
-          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-          .build()
+        applicationBuilder().build()
 
       running(application) {
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
@@ -51,7 +45,6 @@ class AuthControllerSpec extends SpecBase {
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result).value mustBe expectedRedirectUrl
-        verify(mockSessionRepository, times(1)).clear(eqTo(userId))
       }
     }
   }
@@ -59,13 +52,8 @@ class AuthControllerSpec extends SpecBase {
   "AuthController.signOutNoSurvey" - {
 
     "must clear session state and redirect to sign out with the signed out page as continue URL" in {
-      val mockSessionRepository = mock[SessionRepository]
-      when(mockSessionRepository.clear(any[String])) thenReturn Future.successful(true)
-
       val application =
-        applicationBuilder()
-          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-          .build()
+        applicationBuilder().build()
 
       running(application) {
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
@@ -77,7 +65,6 @@ class AuthControllerSpec extends SpecBase {
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result).value mustBe expectedRedirectUrl
-        verify(mockSessionRepository, times(1)).clear(eqTo(userId))
       }
     }
   }

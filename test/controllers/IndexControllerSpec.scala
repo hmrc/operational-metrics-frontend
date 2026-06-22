@@ -17,45 +17,85 @@
 package controllers
 
 import base.SpecBase
-import connector.{MenuBarConnector, OperationalMetricsConnector}
-import models.{BannerMenu, MenuLink}
+import com.github.tomakehurst.wiremock.client.WireMock.{
+  aResponse,
+  get,
+  stubFor,
+  urlPathEqualTo
+}
+import connector.OperationalMetricsConnector
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.test.WireMockSupport
 
 import scala.concurrent.Future
 
-class IndexControllerSpec extends SpecBase {
+class IndexControllerSpec
+    extends SpecBase
+    with WireMockSupport {
 
-  private val emptyMenu = BannerMenu(
-    brand         = MenuLink("brand", "MDTP", "/"),
-    topLevelLinks = Seq.empty,
-    dropdowns     = Seq.empty
-  )
+  private def applicationWith(
+      mockOperationalMetricsConnector: OperationalMetricsConnector
+  ) =
+    applicationBuilder()
+      .configure(
+        "microservice.services.menu-bar.protocol" -> "http",
+        "microservice.services.menu-bar.host"     -> wireMockHost,
+        "microservice.services.menu-bar.port"     -> wireMockPort
+      )
+      .overrides(
+        bind[OperationalMetricsConnector].toInstance(mockOperationalMetricsConnector)
+      )
+      .build()
+
+  private def stubMenuBar(): Unit = {
+    stubFor(
+      get(urlPathEqualTo("/menu-bar/menu"))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(
+              """
+                |{
+                |  "brand": {
+                |    "id": "brand",
+                |    "text": "MDTP",
+                |    "href": "/"
+                |  },
+                |  "topLevelLinks": [],
+                |  "dropdowns": []
+                |}
+                |""".stripMargin
+            )
+        )
+    )
+  }
 
   "IndexController.onPageLoad" - {
 
     "must return OK and render service lead time data" in {
-      val mockOperationalMetricsConnector = mock[OperationalMetricsConnector]
-      when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier])) thenReturn Future.successful(serviceLeadTimes)
+      val mockOperationalMetricsConnector =
+        mock[OperationalMetricsConnector]
 
-      val mockMenuBarConnector = mock[MenuBarConnector]
-      when(mockMenuBarConnector.getMenu()(any[HeaderCarrier])) thenReturn Future.successful(emptyMenu)
+      when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier]))
+        .thenReturn(Future.successful(serviceLeadTimes))
+
+      stubMenuBar()
 
       val application =
-        applicationBuilder()
-          .overrides(
-            bind[OperationalMetricsConnector].toInstance(mockOperationalMetricsConnector),
-            bind[MenuBarConnector].toInstance(mockMenuBarConnector)
-          )
-          .build()
+        applicationWith(mockOperationalMetricsConnector)
 
       running(application) {
-        val request = FakeRequest(GET, routes.IndexController.onPageLoad().url)
-        val result = route(application, request).value
+        val request =
+          FakeRequest(GET, routes.IndexController.onPageLoad().url)
+
+        val result =
+          route(application, request).value
 
         status(result) mustBe OK
         contentAsString(result) must include("Operational Metrics")
@@ -65,23 +105,23 @@ class IndexControllerSpec extends SpecBase {
     }
 
     "must pass the selected team query parameter into the view model" in {
-      val mockOperationalMetricsConnector = mock[OperationalMetricsConnector]
-      when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier])) thenReturn Future.successful(serviceLeadTimes)
+      val mockOperationalMetricsConnector =
+        mock[OperationalMetricsConnector]
 
-      val mockMenuBarConnector = mock[MenuBarConnector]
-      when(mockMenuBarConnector.getMenu()(any[HeaderCarrier])) thenReturn Future.successful(emptyMenu)
+      when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier]))
+        .thenReturn(Future.successful(serviceLeadTimes))
+
+      stubMenuBar()
 
       val application =
-        applicationBuilder()
-          .overrides(
-            bind[OperationalMetricsConnector].toInstance(mockOperationalMetricsConnector),
-            bind[MenuBarConnector].toInstance(mockMenuBarConnector)
-          )
-          .build()
+        applicationWith(mockOperationalMetricsConnector)
 
       running(application) {
-        val request = FakeRequest(GET, routes.IndexController.onPageLoad().url + "?team=PlatOps")
-        val result = route(application, request).value
+        val request =
+          FakeRequest(GET, routes.IndexController.onPageLoad().url + "?team=PlatOps")
+
+        val result =
+          route(application, request).value
 
         status(result) mustBe OK
         contentAsString(result) must include("test-service-one")
