@@ -19,15 +19,37 @@ package controllers
 import javax.inject.Inject
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.cataloguewrapper.services.CatalogueWrapperService
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import views.html.UnauthorisedView
 
-class UnauthorisedController @Inject()(
-                                        val controllerComponents: MessagesControllerComponents,
-                                        view: UnauthorisedView
-                                      ) extends FrontendBaseController with I18nSupport {
+import scala.concurrent.ExecutionContext
 
-  def onPageLoad(): Action[AnyContent] = Action { implicit request =>
-    Ok(view())
-  }
+class UnauthorisedController @Inject()(
+    val controllerComponents: MessagesControllerComponents,
+    catalogueWrapperService: CatalogueWrapperService,
+    view: UnauthorisedView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
+
+  def onPageLoad(): Action[AnyContent] =
+    Action.async { implicit request =>
+      implicit val hc: HeaderCarrier =
+        HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+
+      val content = view()
+
+      catalogueWrapperService
+        .standardCatalogueLayout(
+          content      = content,
+          pageTitle    = Some("You can’t access this service with this account"),
+          activeItemId = None,
+          fullWidth    = false,
+          signOutUrl   = None
+        )
+        .map(Ok(_))
+    }
 }

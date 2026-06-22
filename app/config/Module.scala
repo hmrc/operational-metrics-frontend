@@ -25,7 +25,10 @@ class Module extends AbstractModule {
 
   override def configure(): Unit = {
 
-    // For session based storage instead of cred based, change to SessionIdentifierAction
+    // Temporary PoC binding.
+    // This only checks for a session id and does not perform HMRC auth.
+    //
+    // TODO: Target binding:
     // bind(classOf[IdentifierAction]).to(classOf[AuthenticatedIdentifierAction]).asEagerSingleton()
     bind(classOf[IdentifierAction]).to(classOf[SessionIdentifierAction]).asEagerSingleton()
 

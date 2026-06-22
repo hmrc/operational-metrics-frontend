@@ -56,7 +56,7 @@ class IndexController @Inject()(
           pageTitle    = Some("Operational Metrics"),
           activeItemId = Some("operational-metrics"),
           fullWidth    = false,
-          signOutUrl   = None // TODO: Need to wire in the signout
+          signOutUrl   = Some(controllers.auth.routes.AuthController.signOutNoSurvey().url)
           )
       } yield {
         Ok(html)
