@@ -16,59 +16,64 @@
 
 package controllers.actions
 
-import com.google.inject.Inject
-import config.FrontendAppConfig
-import controllers.routes
+import controllers.auth.AuthController
 import models.requests.IdentifierRequest
-import play.api.mvc.Results._
 import play.api.mvc._
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
-
-import scala.concurrent.{ExecutionContext, Future}
-
-trait IdentifierAction extends ActionBuilder[IdentifierRequest, AnyContent] with ActionFunction[Request, IdentifierRequest]
-
-class AuthenticatedIdentifierAction @Inject()(
-                                               override val authConnector: AuthConnector,
-                                               config: FrontendAppConfig,
-                                               val parser: BodyParsers.Default
-                                             )
-                                             (implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions {
-
-  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
-
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-
-    authorised().retrieve(Retrievals.internalId) {
-      _.map {
-        internalId => block(IdentifierRequest(request, internalId))
-      }.getOrElse(throw new UnauthorizedException("Unable to retrieve internal Id"))
-    } recover {
-      case _: NoActiveSession =>
-        Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
-      case _: AuthorisationException =>
-        Redirect(routes.UnauthorisedController.onPageLoad())
-    }
-  }
+import uk.gov.hmrc.internalauth.client.{
+  FrontendAuthComponents,
+  IAAction,
+  Predicate,
+  Resource,
+  ResourceLocation,
+  ResourceType
 }
 
-class SessionIdentifierAction @Inject()(
-                                         val parser: BodyParsers.Default
-                                       )
-                                       (implicit val executionContext: ExecutionContext) extends IdentifierAction {
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
-  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
+trait IdentifierAction
+    extends ActionBuilder[IdentifierRequest, AnyContent]
+    with ActionFunction[Request, IdentifierRequest]
 
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+class InternalAuthIdentifierAction @Inject()(
+    auth: FrontendAuthComponents,
+    val parser: BodyParsers.Default
+)(implicit val executionContext: ExecutionContext)
+    extends IdentifierAction {
 
-    hc.sessionId match {
-      case Some(session) =>
-        block(IdentifierRequest(request, session.value))
-      case None =>
-        Future.successful(Redirect(routes.UnauthorisedController.onPageLoad()))
-    }
-  }
+  import InternalAuthIdentifierAction._
+
+  override def invokeBlock[A](
+      request: Request[A],
+      block: IdentifierRequest[A] => Future[Result]
+  ): Future[Result] =
+    auth
+      .authorizedAction(
+        AuthController.continueUrl(Call("GET", request.uri)),
+        readPermission
+      )
+      .invokeBlock[A](
+        request,
+        authenticatedRequest =>
+          block(
+            IdentifierRequest(
+              authenticatedRequest.request,
+              authenticatedRequest.request.session
+                .get(AuthController.SessionUsername)
+                .getOrElse("internal-auth-user")
+            )
+          )
+      )
+}
+
+object InternalAuthIdentifierAction {
+
+  val readPermission: Predicate =
+    Predicate.Permission(
+      Resource(
+        ResourceType("operational-metrics-frontend"),
+        ResourceLocation("*")
+      ),
+      IAAction("READ")
+    )
 }
