@@ -8,7 +8,7 @@ This is a placeholder README.md for a new repository
 | Field | Contents |
 |-------|----------|
 | Principal | operational-metrics-frontend | 
-| Redirct Url | http://localhost:9001/operational-metrics-frontend/auth/post-sign-in?targetUrl=%2Foperational-metrics-frontend | 
+| Redirect Url | http://localhost:9001/operational-metrics-frontend/auth/post-sign-in?targetUrl=%2Foperational-metrics-frontend | 
 | Resource Type | operational-metrics-frontend | 
 | Resource Locations | * | 
 | Action | READ |
