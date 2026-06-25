@@ -16,13 +16,7 @@
 
 package controllers
 
-import base.SpecBase
-import com.github.tomakehurst.wiremock.client.WireMock.{
-  aResponse,
-  get,
-  stubFor,
-  urlPathEqualTo
-}
+import base.{SpecBase, MenuBarStubs}
 import connector.OperationalMetricsConnector
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -36,7 +30,8 @@ import scala.concurrent.Future
 
 class IndexControllerSpec
     extends SpecBase
-    with WireMockSupport {
+    with WireMockSupport 
+    with MenuBarStubs {
 
   private def applicationWith(
       mockOperationalMetricsConnector: OperationalMetricsConnector
@@ -52,29 +47,6 @@ class IndexControllerSpec
       )
       .build()
 
-  private def stubMenuBar(): Unit = {
-    stubFor(
-      get(urlPathEqualTo("/menu-bar/menu"))
-        .willReturn(
-          aResponse()
-            .withStatus(200)
-            .withHeader("Content-Type", "application/json")
-            .withBody(
-              """
-                |{
-                |  "brand": {
-                |    "id": "brand",
-                |    "text": "MDTP",
-                |    "href": "/"
-                |  },
-                |  "topLevelLinks": [],
-                |  "dropdowns": []
-                |}
-                |""".stripMargin
-            )
-        )
-    )
-  }
 
   "IndexController.onPageLoad" - {
 
@@ -101,6 +73,7 @@ class IndexControllerSpec
         contentAsString(result) must include("Operational Metrics")
         contentAsString(result) must include("test-service-one")
         contentAsString(result) must include("test-service-two")
+        contentAsString(result) must include(controllers.auth.routes.AuthController.signOut().url)
       }
     }
 
@@ -126,6 +99,7 @@ class IndexControllerSpec
         status(result) mustBe OK
         contentAsString(result) must include("test-service-one")
         contentAsString(result) must not include "test-service-two"
+        contentAsString(result) must include(controllers.auth.routes.AuthController.signOut().url)
       }
     }
   }

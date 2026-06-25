@@ -16,7 +16,7 @@
 
 package base
 
-import controllers.actions.{FakeIdentifierAction, IdentifierAction}
+import controllers.actions.{FakeInternalAuthAction, InternalAuthAction}
 import models.{LeadTimeMeasurement, ServiceLeadTimes}
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -28,8 +28,36 @@ import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
+import com.github.tomakehurst.wiremock.client.WireMock._
+import uk.gov.hmrc.http.test.WireMockSupport
 
 import java.time.Instant
+
+trait MenuBarStubs { self: WireMockSupport =>
+
+  protected def stubMenuBar(): Unit =
+    stubFor(
+      get(urlPathEqualTo("/menu-bar/menu"))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(
+              """
+                |{
+                |  "brand": {
+                |    "id": "brand",
+                |    "text": "MDTP",
+                |    "href": "/"
+                |  },
+                |  "topLevelLinks": [],
+                |  "dropdowns": []
+                |}
+                |""".stripMargin
+            )
+        )
+    )
+}
 
 trait SpecBase
     extends AnyFreeSpec
@@ -38,8 +66,6 @@ trait SpecBase
     with ScalaFutures
     with IntegrationPatience
     with MockitoSugar {
-
-  protected val userId: String = "id"
 
   protected val sampleLeadTime: LeadTimeMeasurement =
     LeadTimeMeasurement(
@@ -72,25 +98,16 @@ trait SpecBase
     new GuiceApplicationBuilder()
       .configure(testConfiguration)
       .overrides(
-        bind[IdentifierAction].to[FakeIdentifierAction]
+        bind[InternalAuthAction].to[FakeInternalAuthAction]
       )
 
   protected val testConfiguration: Map[String, Any] =
     Map(
       "catalogue-frontend.base-url" -> "http://localhost:9017",
-      "microservice.services.auth.protocol" -> "http",
-      "microservice.services.auth.host" -> "localhost",
-      "microservice.services.auth.port" -> 8500,
-      "microservice.services.feedback-frontend.protocol" -> "http",
-      "microservice.services.feedback-frontend.host" -> "localhost",
-      "microservice.services.feedback-frontend.port" -> 9514,
       "microservice.services.operational-metrics.protocol" -> "http",
       "microservice.services.operational-metrics.host" -> "localhost",
       "microservice.services.operational-metrics.port" -> 8863,
       "contact-frontend.host" -> "http://localhost:9250",
-      "urls.login" -> "http://localhost:9949/auth-login-stub/gg-sign-in",
-      "urls.loginContinue" -> "http://localhost:9000/operational-metrics-frontend",
-      "urls.signOut" -> "http://localhost:9553/bas-gateway/sign-out-without-state",
       "host" -> "http://localhost:9000",
       "mongodb.uri" -> "mongodb://localhost:27017/operational-metrics-frontend-test",
       "mongodb.timeToLiveInSeconds" -> 900,

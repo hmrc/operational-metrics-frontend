@@ -16,11 +16,10 @@
 
 package controllers.auth
 
-import config.FrontendAppConfig
 import controllers.routes as appRoutes
 import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, RequestHeader}
-import uk.gov.hmrc.internalauth.client.{AuthenticatedRequest, FrontendAuthComponents, Retrieval}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
+import uk.gov.hmrc.internalauth.client.FrontendAuthComponents
 import uk.gov.hmrc.play.bootstrap.binders.{OnlyRelative, RedirectUrl}
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -30,8 +29,7 @@ import scala.concurrent.ExecutionContext
 
 class AuthController @Inject()(
     val controllerComponents: MessagesControllerComponents,
-    auth: FrontendAuthComponents,
-    config: FrontendAppConfig
+    auth: FrontendAuthComponents
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -48,34 +46,22 @@ class AuthController @Inject()(
   def postSignIn(targetUrl: Option[RedirectUrl]): Action[AnyContent] =
     auth.authenticatedAction(
       continueUrl = routes.AuthController.signIn(sanitize(targetUrl)),
-      retrieval   = Retrieval.username
-    )() { (request: AuthenticatedRequest[AnyContent, Retrieval.Username]) =>
-      implicit val rh: RequestHeader = request.request
-
+    )() { 
       Redirect(
         targetUrl
           .flatMap(_.getEither(OnlyRelative).toOption)
           .fold(appRoutes.IndexController.onPageLoad().url)(_.url)
-      ).addingToSession(
-        SessionUsername -> request.retrieval.value
-    )
+      )
   }
 
   def signOut(): Action[AnyContent] =
     Action {
-      Redirect(config.exitSurveyUrl).withNewSession
-    }
-
-  def signOutNoSurvey(): Action[AnyContent] =
-    Action {
       Redirect(routes.SignedOutController.onPageLoad()).withNewSession
     }
+
 }
 
 object AuthController {
-
-  val SessionUsername: String =
-    "username"
 
   private[auth] def sanitize(targetUrl: Option[RedirectUrl]): Option[RedirectUrl] = {
     val avoid =

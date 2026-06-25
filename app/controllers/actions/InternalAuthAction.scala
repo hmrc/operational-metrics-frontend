@@ -17,7 +17,6 @@
 package controllers.actions
 
 import controllers.auth.AuthController
-import models.requests.IdentifierRequest
 import play.api.mvc._
 import uk.gov.hmrc.internalauth.client.{
   FrontendAuthComponents,
@@ -31,42 +30,34 @@ import uk.gov.hmrc.internalauth.client.{
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-trait IdentifierAction
-    extends ActionBuilder[IdentifierRequest, AnyContent]
-    with ActionFunction[Request, IdentifierRequest]
+trait InternalAuthAction
+    extends ActionBuilder[Request, AnyContent]
+    with ActionFunction[Request, Request]
 
-class InternalAuthIdentifierAction @Inject()(
+class DefaultInternalAuthAction @Inject()(
     auth: FrontendAuthComponents,
     val parser: BodyParsers.Default
 )(implicit val executionContext: ExecutionContext)
-    extends IdentifierAction {
+    extends InternalAuthAction {
 
-  import InternalAuthIdentifierAction._
+  import DefaultInternalAuthAction._
 
   override def invokeBlock[A](
       request: Request[A],
-      block: IdentifierRequest[A] => Future[Result]
+      block: Request[A] => Future[Result]
   ): Future[Result] =
     auth
       .authorizedAction(
-        AuthController.continueUrl(Call("GET", request.uri)),
-        readPermission
+        continueUrl = AuthController.continueUrl(Call("GET", request.uri)),
+        predicate   = readPermission
       )
       .invokeBlock[A](
         request,
-        authenticatedRequest =>
-          block(
-            IdentifierRequest(
-              authenticatedRequest.request,
-              authenticatedRequest.request.session
-                .get(AuthController.SessionUsername)
-                .getOrElse("internal-auth-user")
-            )
-          )
+        authenticatedRequest => block(authenticatedRequest.request)
       )
 }
 
-object InternalAuthIdentifierAction {
+object DefaultInternalAuthAction {
 
   val readPermission: Predicate =
     Predicate.Permission(

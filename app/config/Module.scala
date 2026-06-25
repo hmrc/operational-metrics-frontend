@@ -25,13 +25,7 @@ class Module extends AbstractModule {
 
   override def configure(): Unit = {
 
-    // Temporary PoC binding.
-    // This only checks for a session id and does not perform HMRC auth.
-    //
-    // TODO: Target binding:
-    // bind(classOf[IdentifierAction]).to(classOf[AuthenticatedIdentifierAction]).asEagerSingleton()
-    // bind(classOf[IdentifierAction]).to(classOf[SessionIdentifierAction]).asEagerSingleton()
-    bind(classOf[IdentifierAction]).to(classOf[InternalAuthIdentifierAction]).asEagerSingleton()
+    bind(classOf[InternalAuthAction]).to(classOf[DefaultInternalAuthAction]).asEagerSingleton()
 
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
   }

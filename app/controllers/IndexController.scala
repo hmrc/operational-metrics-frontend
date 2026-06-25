@@ -17,7 +17,7 @@
 package controllers
 
 import connector.{OperationalMetricsConnector}
-import controllers.actions.IdentifierAction
+import controllers.actions.InternalAuthAction
 import javax.inject.Inject
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -32,7 +32,7 @@ import scala.concurrent.ExecutionContext
 
 class IndexController @Inject()(
     val controllerComponents: MessagesControllerComponents,
-    identify: IdentifierAction,
+    internalAuth: InternalAuthAction,
     operationalMetricsConnector: OperationalMetricsConnector,
     catalogueWrapperService: CatalogueWrapperService,
     view: IndexView
@@ -41,7 +41,7 @@ class IndexController @Inject()(
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] =
-    identify.async { implicit request =>
+    internalAuth.async { implicit request =>
       implicit val hc: HeaderCarrier =
         HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
@@ -56,7 +56,7 @@ class IndexController @Inject()(
           pageTitle    = Some("Operational Metrics"),
           activeItemId = Some("operational-metrics"),
           fullWidth    = false,
-          signOutUrl   = Some(controllers.auth.routes.AuthController.signOutNoSurvey().url)
+          signOutUrl   = Some(controllers.auth.routes.AuthController.signOut().url)
           )
       } yield {
         Ok(html)

@@ -17,55 +17,72 @@
 package controllers.auth
 
 import base.SpecBase
-import config.FrontendAppConfig
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{times, verify, when}
-import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-
-import java.net.URLEncoder
-import scala.concurrent.Future
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
 class AuthControllerSpec extends SpecBase {
 
   "AuthController.signOut" - {
 
-    "must clear session state and redirect to sign out with the exit survey as continue URL" in {
+    "must clear session state and redirect to the signed out page" in {
       val application =
         applicationBuilder().build()
 
       running(application) {
-        val appConfig = application.injector.instanceOf[FrontendAppConfig]
-        val request = FakeRequest(GET, routes.AuthController.signOut().url)
-        val result = route(application, request).value
+        val request =
+          FakeRequest(GET, routes.AuthController.signOut().url)
+            .withSession("some-session-key" -> "some-session-value")
 
-        val encodedContinueUrl = URLEncoder.encode(appConfig.exitSurveyUrl, "UTF-8")
-        val expectedRedirectUrl = s"${appConfig.signOutUrl}?continue=$encodedContinueUrl"
+        val result =
+          route(application, request).value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe expectedRedirectUrl
+        redirectLocation(result).value mustBe routes.SignedOutController.onPageLoad().url
+        session(result).data mustBe empty
       }
     }
   }
 
-  "AuthController.signOutNoSurvey" - {
+  "AuthController.continueUrl" - {
 
-    "must clear session state and redirect to sign out with the signed out page as continue URL" in {
-      val application =
-        applicationBuilder().build()
+    "must route through post sign in for a relative target URL" in {
+      val result =
+        AuthController.continueUrl(controllers.routes.IndexController.onPageLoad())
 
-      running(application) {
-        val appConfig = application.injector.instanceOf[FrontendAppConfig]
-        val request = FakeRequest(GET, routes.AuthController.signOutNoSurvey().url)
-        val result = route(application, request).value
+      result.url must include(routes.AuthController.postSignIn(None).url)
+      result.url must include("targetUrl=")
+    }
 
-        val encodedContinueUrl = URLEncoder.encode(routes.SignedOutController.onPageLoad().url, "UTF-8")
-        val expectedRedirectUrl = s"${appConfig.signOutUrl}?continue=$encodedContinueUrl"
+    "must not preserve the root URL as a target" in {
+      val result =
+        AuthController.continueUrl(play.api.mvc.Call("GET", "/"))
 
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe expectedRedirectUrl
-      }
+      result mustBe routes.AuthController.postSignIn(None)
+    }
+  }
+
+  "AuthController.sanitize" - {
+
+    "must remove sign-in URLs to avoid redirect loops" in {
+      val result =
+        AuthController.sanitize(Some(RedirectUrl(routes.AuthController.signIn(None).url)))
+
+      result mustBe None
+    }
+
+    "must remove post-sign-in URLs to avoid redirect loops" in {
+      val result =
+        AuthController.sanitize(Some(RedirectUrl(routes.AuthController.postSignIn(None).url)))
+
+      result mustBe None
+    }
+
+    "must preserve a normal relative target URL" in {
+      val result =
+        AuthController.sanitize(Some(RedirectUrl(controllers.routes.IndexController.onPageLoad().url)))
+
+      result.map(_.unsafeValue) mustBe Some(controllers.routes.IndexController.onPageLoad().url)
     }
   }
 }
