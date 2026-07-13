@@ -14,26 +14,20 @@
  * limitations under the License.
  */
 
-package utils
+package models
 
-import play.api.i18n.Lang
+import base.SpecBase
 
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+class ModeSpec extends SpecBase {
 
-object DateTimeFormats {
+  "Mode JavascriptLiteral" - {
 
-  private val dateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+    "must render NormalMode" in {
+      Mode.jsLiteral.to(NormalMode) mustBe "NormalMode"
+    }
 
-  private val localisedDateTimeFormatters = Map(
-    "en" -> dateTimeFormatter,
-    "cy" -> dateTimeFormatter.withLocale(new Locale("cy"))
-  )
-
-  def dateTimeFormat()(implicit lang: Lang): DateTimeFormatter = {
-    localisedDateTimeFormatters.getOrElse(lang.code, dateTimeFormatter)
+    "must render CheckMode" in {
+      Mode.jsLiteral.to(CheckMode) mustBe "CheckMode"
+    }
   }
-
-  val dateTimeHintFormat: DateTimeFormatter =
-    DateTimeFormatter.ofPattern("d M yyyy")
 }
