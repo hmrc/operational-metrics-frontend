@@ -18,7 +18,7 @@ package controllers.auth
 
 import base.{ApplicationTestSupport, BaseSpec}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
 class AuthControllerSpec extends BaseSpec with ApplicationTestSupport {
@@ -80,7 +80,9 @@ class AuthControllerSpec extends BaseSpec with ApplicationTestSupport {
 
     "preserve a normal relative target URL" in {
       val result =
-        AuthController.sanitize(Some(RedirectUrl(controllers.routes.IndexController.onPageLoad().url)))
+        AuthController.sanitize(
+          Some(RedirectUrl(controllers.routes.IndexController.onPageLoad().url))
+        )
 
       result.map(_.unsafeValue) mustBe Some(controllers.routes.IndexController.onPageLoad().url)
     }

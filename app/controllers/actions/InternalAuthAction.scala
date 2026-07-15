@@ -17,7 +17,7 @@
 package controllers.actions
 
 import controllers.auth.AuthController
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.internalauth.client.{
   FrontendAuthComponents,
   IAAction,
@@ -34,13 +34,13 @@ trait InternalAuthAction
     extends ActionBuilder[Request, AnyContent]
     with ActionFunction[Request, Request]
 
-class DefaultInternalAuthAction @Inject()(
+class DefaultInternalAuthAction @Inject() (
     auth: FrontendAuthComponents,
     val parser: BodyParsers.Default
 )(implicit val executionContext: ExecutionContext)
     extends InternalAuthAction {
 
-  import DefaultInternalAuthAction._
+  import DefaultInternalAuthAction.*
 
   override def invokeBlock[A](
       request: Request[A],
@@ -49,7 +49,7 @@ class DefaultInternalAuthAction @Inject()(
     auth
       .authorizedAction(
         continueUrl = AuthController.continueUrl(Call("GET", request.uri)),
-        predicate   = readPermission
+        predicate = readPermission
       )
       .invokeBlock[A](
         request,

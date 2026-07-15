@@ -27,7 +27,7 @@ import views.html.auth.SignedOutView
 
 import scala.concurrent.ExecutionContext
 
-class SignedOutController @Inject()(
+class SignedOutController @Inject() (
     val controllerComponents: MessagesControllerComponents,
     catalogueWrapperService: CatalogueWrapperService,
     view: SignedOutView
@@ -44,11 +44,11 @@ class SignedOutController @Inject()(
 
       catalogueWrapperService
         .standardCatalogueLayout(
-          content      = content,
-          pageTitle    = Some("For your security, we signed you out"),
+          content = content,
+          pageTitle = Some("For your security, we signed you out"),
           activeItemId = None,
-          fullWidth    = false,
-          signOutUrl   = None
+          fullWidth = false,
+          signOutUrl = None
         )
         .map(Ok(_))
     }

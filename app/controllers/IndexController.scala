@@ -16,7 +16,7 @@
 
 package controllers
 
-import connector.{OperationalMetricsConnector}
+import connector.OperationalMetricsConnector
 import controllers.actions.InternalAuthAction
 import javax.inject.Inject
 import play.api.i18n.I18nSupport
@@ -30,7 +30,7 @@ import views.html.IndexView
 
 import scala.concurrent.ExecutionContext
 
-class IndexController @Inject()(
+class IndexController @Inject() (
     val controllerComponents: MessagesControllerComponents,
     internalAuth: InternalAuthAction,
     operationalMetricsConnector: OperationalMetricsConnector,
@@ -50,14 +50,14 @@ class IndexController @Inject()(
 
       for {
         serviceLeadTimes <- operationalMetricsConnector.getServiceLeadTimes()
-        pageContent      = view(ServiceLeadTimesViewModel.from(serviceLeadTimes, selectedTeam))
-        html             <- catalogueWrapperService.standardCatalogueLayout(
-          content      = pageContent,
-          pageTitle    = Some("Operational Metrics"),
+        pageContent = view(ServiceLeadTimesViewModel.from(serviceLeadTimes, selectedTeam))
+        html <- catalogueWrapperService.standardCatalogueLayout(
+          content = pageContent,
+          pageTitle = Some("Operational Metrics"),
           activeItemId = Some("operational-metrics"),
-          fullWidth    = false,
-          signOutUrl   = Some(controllers.auth.routes.AuthController.signOut().url)
-          )
+          fullWidth = false,
+          signOutUrl = Some(controllers.auth.routes.AuthController.signOut().url)
+        )
       } yield {
         Ok(html)
       }

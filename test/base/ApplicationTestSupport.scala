@@ -37,18 +37,18 @@ trait ApplicationTestSupport {
 
   protected val testConfiguration: Map[String, Any] =
     Map(
-      "catalogue-frontend.base-url"                           -> "http://localhost:9017",
-      "microservice.services.operational-metrics.protocol"   -> "http",
-      "microservice.services.operational-metrics.host"       -> "localhost",
-      "microservice.services.operational-metrics.port"       -> 8863,
-      "contact-frontend.host"                                -> "http://localhost:9250",
-      "host"                                                 -> "http://localhost:9000",
-      "mongodb.uri"                                          -> "mongodb://localhost:27017/operational-metrics-frontend-test",
-      "mongodb.timeToLiveInSeconds"                          -> 900,
-      "timeout-dialog.timeout"                               -> 900,
-      "timeout-dialog.countdown"                             -> 120,
-      "features.welsh-translation"                           -> true,
-      "play.filters.disabled.0"                              -> "play.filters.csrf.CSRFFilter",
-      "play.filters.disabled.1"                              -> "play.filters.csp.CSPFilter"
+      "catalogue-frontend.base-url" -> "http://localhost:9017",
+      "microservice.services.operational-metrics.protocol" -> "http",
+      "microservice.services.operational-metrics.host" -> "localhost",
+      "microservice.services.operational-metrics.port" -> 8863,
+      "contact-frontend.host" -> "http://localhost:9250",
+      "host" -> "http://localhost:9000",
+      "mongodb.uri" -> "mongodb://localhost:27017/operational-metrics-frontend-test",
+      "mongodb.timeToLiveInSeconds" -> 900,
+      "timeout-dialog.timeout" -> 900,
+      "timeout-dialog.countdown" -> 120,
+      "features.welsh-translation" -> true,
+      "play.filters.disabled.0" -> "play.filters.csrf.CSRFFilter",
+      "play.filters.disabled.1" -> "play.filters.csp.CSPFilter"
     )
 }

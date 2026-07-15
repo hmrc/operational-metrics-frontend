@@ -23,7 +23,7 @@ import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.test.WireMockSupport
 
@@ -43,14 +43,13 @@ class IndexControllerSpec
     applicationBuilder()
       .configure(
         "microservice.services.menu-bar.protocol" -> "http",
-        "microservice.services.menu-bar.host"     -> wireMockHost,
-        "microservice.services.menu-bar.port"     -> wireMockPort
+        "microservice.services.menu-bar.host" -> wireMockHost,
+        "microservice.services.menu-bar.port" -> wireMockPort
       )
       .overrides(
         bind[OperationalMetricsConnector].toInstance(mockOperationalMetricsConnector)
       )
       .build()
-
 
   "IndexController.onPageLoad" should {
 

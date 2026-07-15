@@ -17,7 +17,7 @@
 package connector
 
 import base.BaseSpec
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.scalatest.LoneElement
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import play.api.Configuration
@@ -38,15 +38,15 @@ class OperationalMetricsConnectorSpec
       Configuration.from(
         Map(
           "microservice.services.operational-metrics.protocol" -> "http",
-          "microservice.services.operational-metrics.host"     -> wireMockHost,
-          "microservice.services.operational-metrics.port"     -> wireMockPort
+          "microservice.services.operational-metrics.host" -> wireMockHost,
+          "microservice.services.operational-metrics.port" -> wireMockPort
         )
       )
     )
 
   private val connector =
     new OperationalMetricsConnector(
-      httpClient     = httpClientV2,
+      httpClient = httpClientV2,
       servicesConfig = servicesConfig
     )(scala.concurrent.ExecutionContext.global)
 

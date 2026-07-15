@@ -19,7 +19,7 @@ package views
 import base.{ApplicationTestSupport, BaseSpec}
 import play.api.data.Form
 import play.api.data.Forms.{nonEmptyText, single}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
 class ViewUtilsSpec extends BaseSpec with ApplicationTestSupport {
 
@@ -46,7 +46,7 @@ class ViewUtilsSpec extends BaseSpec with ApplicationTestSupport {
         implicit val msgs = messages(application)
 
         ViewUtils.titleNoForm(
-          title   = "index.title",
+          title = "index.title",
           section = Some("checkYourAnswers.title")
         ) mustBe
           "operational-metrics-frontend - Check your answers - operational-metrics-frontend - GOV.UK"

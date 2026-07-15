@@ -16,7 +16,7 @@
 
 package base
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import uk.gov.hmrc.http.test.WireMockSupport
 
 trait MenuBarStubs { self: WireMockSupport =>

@@ -29,7 +29,7 @@ import views.html.ErrorTemplate
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ErrorHandler @Inject()(
+class ErrorHandler @Inject() (
     val messagesApi: MessagesApi,
     catalogueWrapperService: CatalogueWrapperService,
     view: ErrorTemplate
@@ -53,11 +53,11 @@ class ErrorHandler @Inject()(
 
     catalogueWrapperService
       .standardCatalogueLayout(
-        content      = content,
-        pageTitle    = Some(messages(pageTitle)),
+        content = content,
+        pageTitle = Some(messages(pageTitle)),
         activeItemId = None,
-        fullWidth    = false,
-        signOutUrl   = None
+        fullWidth = false,
+        signOutUrl = None
       )
   }
 }

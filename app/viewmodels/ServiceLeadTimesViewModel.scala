@@ -57,13 +57,13 @@ object ServiceLeadTimesViewModel {
 
         service.leadTimes.map { leadTime =>
           ServiceLeadTimeRow(
-            serviceName     = service.serviceName,
-            team            = team,
-            environment     = leadTime.environment,
-            version         = leadTime.version,
-            slugCreatedAt   = leadTime.slugCreatedAt,
+            serviceName = service.serviceName,
+            team = team,
+            environment = leadTime.environment,
+            version = leadTime.version,
+            slugCreatedAt = leadTime.slugCreatedAt,
             firstDeployedAt = leadTime.firstDeployedAt,
-            days            = leadTime.days
+            days = leadTime.days
           )
         }
       }
@@ -81,8 +81,8 @@ object ServiceLeadTimesViewModel {
 
     ServiceLeadTimesViewModel(
       selectedTeam = selectedTeam.filter(_.nonEmpty),
-      teams        = teams,
-      rows         = filteredRows.sortBy(row => (row.team, row.serviceName, row.environment, row.version))
+      teams = teams,
+      rows = filteredRows.sortBy(row => (row.team, row.serviceName, row.environment, row.version))
     )
   }
 }

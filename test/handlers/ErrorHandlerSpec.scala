@@ -17,10 +17,10 @@
 package handlers
 
 import base.{ApplicationTestSupport, BaseSpec}
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.test.WireMockSupport
 
 class ErrorHandlerSpec
@@ -34,8 +34,8 @@ class ErrorHandlerSpec
     applicationBuilder()
       .configure(
         "microservice.services.menu-bar.protocol" -> "http",
-        "microservice.services.menu-bar.host"     -> wireMockHost,
-        "microservice.services.menu-bar.port"     -> wireMockPort
+        "microservice.services.menu-bar.host" -> wireMockHost,
+        "microservice.services.menu-bar.port" -> wireMockPort
       )
       .build()
 
@@ -48,16 +48,20 @@ class ErrorHandlerSpec
             aResponse()
               .withStatus(200)
               .withHeader("Content-Type", "application/json")
-              .withBody("""{"brand":{"id":"brand","text":"MDTP","href":"/"},"topLevelLinks":[],"dropdowns":[]}""")
+              .withBody(
+                """{"brand":{"id":"brand","text":"MDTP","href":"/"},"topLevelLinks":[],"dropdowns":[]}"""
+              )
           )
       )
 
       val app = applicationWithMenuBar()
 
       running(app) {
-        val handler          = app.injector.instanceOf[ErrorHandler]
+        val handler = app.injector.instanceOf[ErrorHandler]
         implicit val request = FakeRequest()
-        val result           = handler.standardErrorTemplate("error.heading", "error.heading", "error.message").futureValue
+        val result = handler
+          .standardErrorTemplate("error.heading", "error.heading", "error.message")
+          .futureValue
 
         result.body must include("<!DOCTYPE html>")
         result.body must include("error.heading")
@@ -73,9 +77,11 @@ class ErrorHandlerSpec
       val app = applicationWithMenuBar()
 
       running(app) {
-        val handler          = app.injector.instanceOf[ErrorHandler]
+        val handler = app.injector.instanceOf[ErrorHandler]
         implicit val request = FakeRequest()
-        val result           = handler.standardErrorTemplate("error.heading", "error.heading", "error.message").futureValue
+        val result = handler
+          .standardErrorTemplate("error.heading", "error.heading", "error.message")
+          .futureValue
 
         result.body must include("<!DOCTYPE html>")
         result.body must include("error.heading")

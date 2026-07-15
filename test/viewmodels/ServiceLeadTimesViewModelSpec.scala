@@ -27,7 +27,7 @@ class ServiceLeadTimesViewModelSpec extends BaseSpec with MetricsTestData {
       val result =
         ServiceLeadTimesViewModel.from(
           serviceLeadTimes = Seq(ServiceLeadTimes("test-service-one", Seq(sampleLeadTime))),
-          selectedTeam     = None
+          selectedTeam = None
         )
 
       result.selectedTeam mustBe None
@@ -44,7 +44,7 @@ class ServiceLeadTimesViewModelSpec extends BaseSpec with MetricsTestData {
       val result =
         ServiceLeadTimesViewModel.from(
           serviceLeadTimes = serviceLeadTimes,
-          selectedTeam     = None
+          selectedTeam = None
         )
 
       result.teams mustBe Seq("MDTP", "PlatOps")
@@ -54,7 +54,7 @@ class ServiceLeadTimesViewModelSpec extends BaseSpec with MetricsTestData {
       val result =
         ServiceLeadTimesViewModel.from(
           serviceLeadTimes = serviceLeadTimes,
-          selectedTeam     = Some("PlatOps")
+          selectedTeam = Some("PlatOps")
         )
 
       result.selectedTeam mustBe Some("PlatOps")
@@ -66,18 +66,21 @@ class ServiceLeadTimesViewModelSpec extends BaseSpec with MetricsTestData {
       val result =
         ServiceLeadTimesViewModel.from(
           serviceLeadTimes = serviceLeadTimes,
-          selectedTeam     = Some("")
+          selectedTeam = Some("")
         )
 
       result.selectedTeam mustBe None
-      result.rows.map(_.serviceName) must contain theSameElementsAs Seq("test-service-one", "test-service-two")
+      result.rows.map(_.serviceName) must contain theSameElementsAs Seq(
+        "test-service-one",
+        "test-service-two"
+      )
     }
 
     "put unmapped services into Unknown" in {
       val result =
         ServiceLeadTimesViewModel.from(
           serviceLeadTimes = Seq(ServiceLeadTimes("unmapped-service", Seq(sampleLeadTime))),
-          selectedTeam     = None
+          selectedTeam = None
         )
 
       result.teams mustBe Seq("Unknown")

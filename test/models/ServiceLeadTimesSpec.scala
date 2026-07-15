@@ -43,7 +43,7 @@ class ServiceLeadTimesSpec extends BaseSpec with MetricsTestData {
 
       val expected = ServiceLeadTimes(
         serviceName = "test-service-one",
-        leadTimes   = Seq(sampleLeadTime)
+        leadTimes = Seq(sampleLeadTime)
       )
 
       json.validate[ServiceLeadTimes] mustBe JsSuccess(expected)
@@ -54,11 +54,11 @@ class ServiceLeadTimesSpec extends BaseSpec with MetricsTestData {
         "serviceName" -> "test-service-one",
         "leadTimes" -> Json.arr(
           Json.obj(
-            "environment"     -> "Production",
-            "version"         -> "1.2.3",
-            "slugCreatedAt"   -> "2026-06-01T09:00:00Z",
+            "environment" -> "Production",
+            "version" -> "1.2.3",
+            "slugCreatedAt" -> "2026-06-01T09:00:00Z",
             "firstDeployedAt" -> "2026-06-03T11:00:00Z",
-            "days"            -> 2
+            "days" -> 2
           )
         )
       )

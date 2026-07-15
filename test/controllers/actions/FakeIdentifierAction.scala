@@ -16,13 +16,12 @@
 
 package controllers.actions
 
-import play.api.mvc._
+import play.api.mvc.*
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class FakeInternalAuthAction @Inject()(bodyParsers: PlayBodyParsers)
-    extends InternalAuthAction {
+class FakeInternalAuthAction @Inject() (bodyParsers: PlayBodyParsers) extends InternalAuthAction {
 
   override def invokeBlock[A](
       request: Request[A],

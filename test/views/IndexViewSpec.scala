@@ -19,7 +19,7 @@ package views
 import base.{ApplicationTestSupport, BaseSpec, MetricsTestData}
 import controllers.routes
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import viewmodels.ServiceLeadTimesViewModel
 import views.html.IndexView
 

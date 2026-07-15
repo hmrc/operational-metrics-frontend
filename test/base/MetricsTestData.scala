@@ -24,20 +24,20 @@ trait MetricsTestData {
 
   protected val sampleLeadTime: LeadTimeMeasurement =
     LeadTimeMeasurement(
-      environment     = "Production",
-      version         = "1.2.3",
-      slugCreatedAt   = Instant.parse("2026-06-01T09:00:00Z"),
+      environment = "Production",
+      version = "1.2.3",
+      slugCreatedAt = Instant.parse("2026-06-01T09:00:00Z"),
       firstDeployedAt = Instant.parse("2026-06-03T11:00:00Z"),
-      days            = 2
+      days = 2
     )
 
   protected val anotherLeadTime: LeadTimeMeasurement =
     LeadTimeMeasurement(
-      environment     = "Production",
-      version         = "2.4.0",
-      slugCreatedAt   = Instant.parse("2026-05-20T12:00:00Z"),
+      environment = "Production",
+      version = "2.4.0",
+      slugCreatedAt = Instant.parse("2026-05-20T12:00:00Z"),
       firstDeployedAt = Instant.parse("2026-05-27T12:00:00Z"),
-      days            = 7
+      days = 7
     )
 
   protected val serviceLeadTimes: Seq[ServiceLeadTimes] =

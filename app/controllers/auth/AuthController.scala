@@ -21,20 +21,20 @@ import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import uk.gov.hmrc.internalauth.client.FrontendAuthComponents
 import uk.gov.hmrc.play.bootstrap.binders.{OnlyRelative, RedirectUrl}
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl._
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.*
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class AuthController @Inject()(
+class AuthController @Inject() (
     val controllerComponents: MessagesControllerComponents,
     auth: FrontendAuthComponents
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  import AuthController._
+  import AuthController.*
 
   def signIn(targetUrl: Option[RedirectUrl]): Action[AnyContent] =
     auth.authenticatedAction(
@@ -45,14 +45,14 @@ class AuthController @Inject()(
 
   def postSignIn(targetUrl: Option[RedirectUrl]): Action[AnyContent] =
     auth.authenticatedAction(
-      continueUrl = routes.AuthController.signIn(sanitize(targetUrl)),
-    )() { 
+      continueUrl = routes.AuthController.signIn(sanitize(targetUrl))
+    )() {
       Redirect(
         targetUrl
           .flatMap(_.getEither(OnlyRelative).toOption)
           .fold(appRoutes.IndexController.onPageLoad().url)(_.url)
       )
-  }
+    }
 
   def signOut(): Action[AnyContent] =
     Action {
