@@ -19,11 +19,12 @@ package base
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import uk.gov.hmrc.http.test.WireMockSupport
 
-trait MenuBarStubs { self: WireMockSupport =>
+trait CatalogueNavigationStubs:
+  self: WireMockSupport =>
 
-  protected def stubMenuBar(): Unit =
+  protected def stubNavigation(): Unit =
     stubFor(
-      get(urlPathEqualTo("/menu-bar/menu"))
+      get(urlEqualTo("/catalogue-config/menu-bar/menu"))
         .willReturn(
           aResponse()
             .withStatus(200)
@@ -32,9 +33,11 @@ trait MenuBarStubs { self: WireMockSupport =>
               """
                 |{
                 |  "brand": {
+                |    "name": "MDTP",
                 |    "id": "brand",
-                |    "text": "MDTP",
-                |    "href": "/"
+                |    "href": "/",
+                |    "external": false,
+                |    "_type": "TopMenu"
                 |  },
                 |  "topLevelLinks": [],
                 |  "dropdowns": []
@@ -43,4 +46,24 @@ trait MenuBarStubs { self: WireMockSupport =>
             )
         )
     )
-}
+
+    stubFor(
+      get(urlEqualTo("/catalogue-config/menu-bar/search-index"))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody("[]")
+        )
+    )
+
+  protected def stubNavigationUnavailable(): Unit =
+    stubFor(
+      get(urlEqualTo("/catalogue-config/menu-bar/menu"))
+        .willReturn(aResponse().withStatus(503))
+    )
+
+    stubFor(
+      get(urlEqualTo("/catalogue-config/menu-bar/search-index"))
+        .willReturn(aResponse().withStatus(503))
+    )

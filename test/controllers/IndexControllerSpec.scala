@@ -16,7 +16,7 @@
 
 package controllers
 
-import base.{ApplicationTestSupport, BaseSpec, MenuBarStubs, MetricsTestData}
+import base.{ApplicationTestSupport, BaseSpec, CatalogueNavigationStubs, MetricsTestData}
 import connector.OperationalMetricsConnector
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -35,7 +35,7 @@ class IndexControllerSpec
     with ApplicationTestSupport
     with MockitoSugar
     with WireMockSupport
-    with MenuBarStubs {
+    with CatalogueNavigationStubs:
 
   private def applicationWith(
       mockOperationalMetricsConnector: OperationalMetricsConnector
@@ -60,7 +60,7 @@ class IndexControllerSpec
       when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier]))
         .thenReturn(Future.successful(serviceLeadTimes))
 
-      stubMenuBar()
+      stubNavigation()
 
       val application =
         applicationWith(mockOperationalMetricsConnector)
@@ -87,7 +87,7 @@ class IndexControllerSpec
       when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier]))
         .thenReturn(Future.successful(serviceLeadTimes))
 
-      stubMenuBar()
+      stubNavigation()
 
       val application =
         applicationWith(mockOperationalMetricsConnector)
@@ -106,4 +106,3 @@ class IndexControllerSpec
       }
     }
   }
-}

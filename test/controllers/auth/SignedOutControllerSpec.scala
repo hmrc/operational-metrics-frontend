@@ -16,26 +16,36 @@
 
 package controllers.auth
 
-import base.{ApplicationTestSupport, BaseSpec}
+import base.{ApplicationTestSupport, BaseSpec, CatalogueNavigationStubs}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import views.html.auth.SignedOutView
+import uk.gov.hmrc.http.test.WireMockSupport
 
-class SignedOutControllerSpec extends BaseSpec with ApplicationTestSupport {
+class SignedOutControllerSpec
+    extends BaseSpec
+    with ApplicationTestSupport
+    with WireMockSupport
+    with CatalogueNavigationStubs:
 
   "SignedOutController.onPageLoad" should {
 
     "return OK and render the signed out view" in {
-      val application = applicationBuilder().build()
+      stubNavigation()
+
+      val application = applicationBuilder()
+        .configure(
+          "microservice.services.menu-bar.protocol" -> "http",
+          "microservice.services.menu-bar.host"     -> wireMockHost,
+          "microservice.services.menu-bar.port"     -> wireMockPort
+        )
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, routes.SignedOutController.onPageLoad().url)
-        val result = route(application, request).value
-        val view = application.injector.instanceOf[SignedOutView]
+        val result  = route(application, request).value
 
         status(result) mustBe OK
         contentAsString(result) must include("For your security, we signed you out")
       }
     }
   }
-}

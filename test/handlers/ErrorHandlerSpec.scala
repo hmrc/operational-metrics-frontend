@@ -16,7 +16,7 @@
 
 package handlers
 
-import base.{ApplicationTestSupport, BaseSpec}
+import base.{ApplicationTestSupport, BaseSpec, CatalogueNavigationStubs}
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import play.api.test.FakeRequest
@@ -28,64 +28,58 @@ class ErrorHandlerSpec
     with ApplicationTestSupport
     with ScalaFutures
     with IntegrationPatience
-    with WireMockSupport {
+    with WireMockSupport
+    with CatalogueNavigationStubs:
 
   private def applicationWithMenuBar() =
     applicationBuilder()
       .configure(
         "microservice.services.menu-bar.protocol" -> "http",
-        "microservice.services.menu-bar.host" -> wireMockHost,
-        "microservice.services.menu-bar.port" -> wireMockPort
+        "microservice.services.menu-bar.host"     -> wireMockHost,
+        "microservice.services.menu-bar.port"     -> wireMockPort
       )
       .build()
 
   "ErrorHandler.standardErrorTemplate" should {
 
     "produce a complete wrapped error page when navigation is available" in {
-      stubFor(
-        get(urlPathEqualTo("/menu-bar/menu"))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-              .withHeader("Content-Type", "application/json")
-              .withBody(
-                """{"brand":{"id":"brand","text":"MDTP","href":"/"},"topLevelLinks":[],"dropdowns":[]}"""
-              )
-          )
-      )
+      stubNavigation()
 
       val app = applicationWithMenuBar()
 
       running(app) {
-        val handler = app.injector.instanceOf[ErrorHandler]
+        val handler          = app.injector.instanceOf[ErrorHandler]
         implicit val request = FakeRequest()
-        val result = handler
+        val result           = handler
           .standardErrorTemplate("error.heading", "error.heading", "error.message")
           .futureValue
 
         result.body must include("<!DOCTYPE html>")
+        result.body must include("MDTP")
         result.body must include("error.heading")
+
+        verify(getRequestedFor(urlEqualTo("/catalogue-config/menu-bar/menu")))
+        verify(getRequestedFor(urlEqualTo("/catalogue-config/menu-bar/search-index")))
       }
     }
 
     "produce a complete wrapped error page with empty navigation when the menu backend is unavailable" in {
-      stubFor(
-        get(urlPathEqualTo("/menu-bar/menu"))
-          .willReturn(aResponse().withStatus(503))
-      )
+      stubNavigationUnavailable()
 
       val app = applicationWithMenuBar()
 
       running(app) {
-        val handler = app.injector.instanceOf[ErrorHandler]
+        val handler          = app.injector.instanceOf[ErrorHandler]
         implicit val request = FakeRequest()
-        val result = handler
+        val result           = handler
           .standardErrorTemplate("error.heading", "error.heading", "error.message")
           .futureValue
 
         result.body must include("<!DOCTYPE html>")
         result.body must include("error.heading")
+
+        verify(getRequestedFor(urlEqualTo("/catalogue-config/menu-bar/menu")))
+        verify(getRequestedFor(urlEqualTo("/catalogue-config/menu-bar/search-index")))
       }
     }
   }
-}
