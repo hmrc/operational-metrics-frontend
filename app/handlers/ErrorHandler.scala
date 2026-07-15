@@ -59,8 +59,5 @@ class ErrorHandler @Inject()(
         fullWidth    = false,
         signOutUrl   = None
       )
-      .recover {
-        case _ => content
-      }
   }
 }

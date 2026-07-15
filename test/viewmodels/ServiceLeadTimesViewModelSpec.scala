@@ -16,14 +16,14 @@
 
 package viewmodels
 
-import base.SpecBase
+import base.{BaseSpec, MetricsTestData}
 import models.ServiceLeadTimes
 
-class ServiceLeadTimesViewModelSpec extends SpecBase {
+class ServiceLeadTimesViewModelSpec extends BaseSpec with MetricsTestData {
 
-  "ServiceLeadTimesViewModel.from" - {
+  "ServiceLeadTimesViewModel.from" should {
 
-    "must flatten service lead times into table rows" in {
+    "flatten service lead times into table rows" in {
       val result =
         ServiceLeadTimesViewModel.from(
           serviceLeadTimes = Seq(ServiceLeadTimes("test-service-one", Seq(sampleLeadTime))),
@@ -40,7 +40,7 @@ class ServiceLeadTimesViewModelSpec extends SpecBase {
       result.rows.head.days mustBe 2
     }
 
-    "must expose all distinct teams in sorted order" in {
+    "expose all distinct teams in sorted order" in {
       val result =
         ServiceLeadTimesViewModel.from(
           serviceLeadTimes = serviceLeadTimes,
@@ -50,7 +50,7 @@ class ServiceLeadTimesViewModelSpec extends SpecBase {
       result.teams mustBe Seq("MDTP", "PlatOps")
     }
 
-    "must filter rows by selected team" in {
+    "filter rows by selected team" in {
       val result =
         ServiceLeadTimesViewModel.from(
           serviceLeadTimes = serviceLeadTimes,
@@ -62,7 +62,7 @@ class ServiceLeadTimesViewModelSpec extends SpecBase {
       result.rows.map(_.team).distinct mustBe Seq("PlatOps")
     }
 
-    "must treat an empty selected team as no filter" in {
+    "treat an empty selected team as no filter" in {
       val result =
         ServiceLeadTimesViewModel.from(
           serviceLeadTimes = serviceLeadTimes,
@@ -73,7 +73,7 @@ class ServiceLeadTimesViewModelSpec extends SpecBase {
       result.rows.map(_.serviceName) must contain theSameElementsAs Seq("test-service-one", "test-service-two")
     }
 
-    "must put unmapped services into Unknown" in {
+    "put unmapped services into Unknown" in {
       val result =
         ServiceLeadTimesViewModel.from(
           serviceLeadTimes = Seq(ServiceLeadTimes("unmapped-service", Seq(sampleLeadTime))),

@@ -16,16 +16,16 @@
 
 package controllers.auth
 
-import base.SpecBase
+import base.{ApplicationTestSupport, BaseSpec}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.auth.SignedOutView
 
-class SignedOutControllerSpec extends SpecBase {
+class SignedOutControllerSpec extends BaseSpec with ApplicationTestSupport {
 
-  "SignedOutController.onPageLoad" - {
+  "SignedOutController.onPageLoad" should {
 
-    "must return OK and render the signed out view" in {
+    "return OK and render the signed out view" in {
       val application = applicationBuilder().build()
 
       running(application) {

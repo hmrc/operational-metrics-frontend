@@ -16,18 +16,18 @@
 
 package views
 
-import base.SpecBase
+import base.{ApplicationTestSupport, BaseSpec, MetricsTestData}
 import controllers.routes
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import viewmodels.ServiceLeadTimesViewModel
 import views.html.IndexView
 
-class IndexViewSpec extends SpecBase {
+class IndexViewSpec extends BaseSpec with MetricsTestData with ApplicationTestSupport {
 
-  "IndexView" - {
+  "IndexView" should {
 
-    "must render the operational metrics table" in {
+    "render the operational metrics table" in {
       val application = applicationBuilder().build()
 
       running(application) {
@@ -47,7 +47,7 @@ class IndexViewSpec extends SpecBase {
       }
     }
 
-    "must show the selected team and clear filters link when filtered" in {
+    "show the selected team and clear filters link when filtered" in {
       val application = applicationBuilder().build()
 
       running(application) {

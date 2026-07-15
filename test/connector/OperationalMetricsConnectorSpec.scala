@@ -16,15 +16,20 @@
 
 package connector
 
-import base.SpecBase
+import base.BaseSpec
 import com.github.tomakehurst.wiremock.client.WireMock._
+import org.scalatest.LoneElement
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import play.api.Configuration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.test.{HttpClientV2Support, WireMockSupport}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 class OperationalMetricsConnectorSpec
-    extends SpecBase
+    extends BaseSpec
+    with ScalaFutures
+    with IntegrationPatience
+    with LoneElement
     with HttpClientV2Support
     with WireMockSupport {
 
@@ -47,9 +52,9 @@ class OperationalMetricsConnectorSpec
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  "getServiceLeadTimes" - {
+  "getServiceLeadTimes" should {
 
-    "must call operational-metrics and decode the response" in {
+    "call operational-metrics and decode the response" in {
       stubFor(
         get(urlEqualTo("/operational-metrics/service-lead-times"))
           .willReturn(
@@ -79,10 +84,12 @@ class OperationalMetricsConnectorSpec
 
       val result = connector.getServiceLeadTimes().futureValue
 
-      result.size mustBe 1
-      result.head.serviceName mustBe "test-service-one"
-      result.head.leadTimes.head.version mustBe "1.2.3"
-      result.head.leadTimes.head.days mustBe 2
+      val service = result.loneElement
+      service.serviceName mustBe "test-service-one"
+
+      val leadTime = service.leadTimes.loneElement
+      leadTime.version mustBe "1.2.3"
+      leadTime.days mustBe 2
 
       verify(getRequestedFor(urlEqualTo("/operational-metrics/service-lead-times")))
     }

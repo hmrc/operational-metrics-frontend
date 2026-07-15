@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package models
+package base
 
-import base.BaseSpec
+import org.scalatest.OptionValues
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class ModeSpec extends BaseSpec {
-
-  "Mode JavascriptLiteral" should {
-
-    "render NormalMode" in {
-      Mode.jsLiteral.to(NormalMode) mustBe "NormalMode"
-    }
-
-    "render CheckMode" in {
-      Mode.jsLiteral.to(CheckMode) mustBe "CheckMode"
-    }
-  }
-}
+abstract class BaseSpec extends AnyWordSpec with Matchers with OptionValues

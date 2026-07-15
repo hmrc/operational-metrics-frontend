@@ -16,10 +16,11 @@
 
 package controllers
 
-import base.{SpecBase, MenuBarStubs}
+import base.{ApplicationTestSupport, BaseSpec, MenuBarStubs, MetricsTestData}
 import connector.OperationalMetricsConnector
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -29,8 +30,11 @@ import uk.gov.hmrc.http.test.WireMockSupport
 import scala.concurrent.Future
 
 class IndexControllerSpec
-    extends SpecBase
-    with WireMockSupport 
+    extends BaseSpec
+    with MetricsTestData
+    with ApplicationTestSupport
+    with MockitoSugar
+    with WireMockSupport
     with MenuBarStubs {
 
   private def applicationWith(
@@ -48,9 +52,9 @@ class IndexControllerSpec
       .build()
 
 
-  "IndexController.onPageLoad" - {
+  "IndexController.onPageLoad" should {
 
-    "must return OK and render service lead time data" in {
+    "return OK and render service lead time data" in {
       val mockOperationalMetricsConnector =
         mock[OperationalMetricsConnector]
 
@@ -77,7 +81,7 @@ class IndexControllerSpec
       }
     }
 
-    "must pass the selected team query parameter into the view model" in {
+    "pass the selected team query parameter into the view model" in {
       val mockOperationalMetricsConnector =
         mock[OperationalMetricsConnector]
 

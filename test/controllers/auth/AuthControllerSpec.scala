@@ -16,16 +16,16 @@
 
 package controllers.auth
 
-import base.SpecBase
+import base.{ApplicationTestSupport, BaseSpec}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
-class AuthControllerSpec extends SpecBase {
+class AuthControllerSpec extends BaseSpec with ApplicationTestSupport {
 
-  "AuthController.signOut" - {
+  "AuthController.signOut" should {
 
-    "must clear session state and redirect to the signed out page" in {
+    "clear session state and redirect to the signed out page" in {
       val application =
         applicationBuilder().build()
 
@@ -44,9 +44,9 @@ class AuthControllerSpec extends SpecBase {
     }
   }
 
-  "AuthController.continueUrl" - {
+  "AuthController.continueUrl" should {
 
-    "must route through post sign in for a relative target URL" in {
+    "route through post sign in for a relative target URL" in {
       val result =
         AuthController.continueUrl(controllers.routes.IndexController.onPageLoad())
 
@@ -54,7 +54,7 @@ class AuthControllerSpec extends SpecBase {
       result.url must include("targetUrl=")
     }
 
-    "must not preserve the root URL as a target" in {
+    "not preserve the root URL as a target" in {
       val result =
         AuthController.continueUrl(play.api.mvc.Call("GET", "/"))
 
@@ -62,23 +62,23 @@ class AuthControllerSpec extends SpecBase {
     }
   }
 
-  "AuthController.sanitize" - {
+  "AuthController.sanitize" should {
 
-    "must remove sign-in URLs to avoid redirect loops" in {
+    "remove sign-in URLs to avoid redirect loops" in {
       val result =
         AuthController.sanitize(Some(RedirectUrl(routes.AuthController.signIn(None).url)))
 
       result mustBe None
     }
 
-    "must remove post-sign-in URLs to avoid redirect loops" in {
+    "remove post-sign-in URLs to avoid redirect loops" in {
       val result =
         AuthController.sanitize(Some(RedirectUrl(routes.AuthController.postSignIn(None).url)))
 
       result mustBe None
     }
 
-    "must preserve a normal relative target URL" in {
+    "preserve a normal relative target URL" in {
       val result =
         AuthController.sanitize(Some(RedirectUrl(controllers.routes.IndexController.onPageLoad().url)))
 

@@ -16,19 +16,19 @@
 
 package views
 
-import base.SpecBase
+import base.{ApplicationTestSupport, BaseSpec}
 import play.api.data.Form
 import play.api.data.Forms.{nonEmptyText, single}
 import play.api.test.Helpers._
 
-class ViewUtilsSpec extends SpecBase {
+class ViewUtilsSpec extends BaseSpec with ApplicationTestSupport {
 
   private val form: Form[String] =
     Form(single("value" -> nonEmptyText))
 
-  "ViewUtils.titleNoForm" - {
+  "ViewUtils.titleNoForm" should {
 
-    "must construct a title without a section" in {
+    "construct a title without a section" in {
       val application = applicationBuilder().build()
 
       running(application) {
@@ -39,7 +39,7 @@ class ViewUtilsSpec extends SpecBase {
       }
     }
 
-    "must construct a title with a section" in {
+    "construct a title with a section" in {
       val application = applicationBuilder().build()
 
       running(application) {
@@ -54,9 +54,9 @@ class ViewUtilsSpec extends SpecBase {
     }
   }
 
-  "ViewUtils.errorPrefix" - {
+  "ViewUtils.errorPrefix" should {
 
-    "must return the error prefix when the form contains errors" in {
+    "return the error prefix when the form contains errors" in {
       val application = applicationBuilder().build()
 
       running(application) {
@@ -69,7 +69,7 @@ class ViewUtilsSpec extends SpecBase {
       }
     }
 
-    "must return an empty prefix when the form has no errors" in {
+    "return an empty prefix when the form has no errors" in {
       val application = applicationBuilder().build()
 
       running(application) {
@@ -83,9 +83,9 @@ class ViewUtilsSpec extends SpecBase {
     }
   }
 
-  "ViewUtils.title" - {
+  "ViewUtils.title" should {
 
-    "must include the error prefix when the form contains errors" in {
+    "include the error prefix when the form contains errors" in {
       val application = applicationBuilder().build()
 
       running(application) {
@@ -98,7 +98,7 @@ class ViewUtilsSpec extends SpecBase {
       }
     }
 
-    "must not include the error prefix when the form is valid" in {
+    "not include the error prefix when the form is valid" in {
       val application = applicationBuilder().build()
 
       running(application) {

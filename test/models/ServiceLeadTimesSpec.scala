@@ -16,16 +16,14 @@
 
 package models
 
-import base.SpecBase
-import play.api.libs.json.Json
+import base.{BaseSpec, MetricsTestData}
+import play.api.libs.json.{Json, JsSuccess}
 
-import java.time.Instant
+class ServiceLeadTimesSpec extends BaseSpec with MetricsTestData {
 
-class ServiceLeadTimesSpec extends SpecBase {
+  "ServiceLeadTimes JSON format" should {
 
-  "ServiceLeadTimes JSON format" - {
-
-    "must read backend JSON" in {
+    "read backend JSON" in {
       val json = Json.parse(
         """
           |{
@@ -43,22 +41,29 @@ class ServiceLeadTimesSpec extends SpecBase {
           |""".stripMargin
       )
 
-      val result = json.as[ServiceLeadTimes]
+      val expected = ServiceLeadTimes(
+        serviceName = "test-service-one",
+        leadTimes   = Seq(sampleLeadTime)
+      )
 
-      result.serviceName mustBe "test-service-one"
-      result.leadTimes.head.environment mustBe "Production"
-      result.leadTimes.head.version mustBe "1.2.3"
-      result.leadTimes.head.slugCreatedAt mustBe Instant.parse("2026-06-01T09:00:00Z")
-      result.leadTimes.head.firstDeployedAt mustBe Instant.parse("2026-06-03T11:00:00Z")
-      result.leadTimes.head.days mustBe 2
+      json.validate[ServiceLeadTimes] mustBe JsSuccess(expected)
     }
 
-    "must write backend JSON" in {
-      val json = Json.toJson(ServiceLeadTimes("test-service-one", Seq(sampleLeadTime)))
+    "write backend JSON" in {
+      val expectedJson = Json.obj(
+        "serviceName" -> "test-service-one",
+        "leadTimes" -> Json.arr(
+          Json.obj(
+            "environment"     -> "Production",
+            "version"         -> "1.2.3",
+            "slugCreatedAt"   -> "2026-06-01T09:00:00Z",
+            "firstDeployedAt" -> "2026-06-03T11:00:00Z",
+            "days"            -> 2
+          )
+        )
+      )
 
-      (json \ "serviceName").as[String] mustBe "test-service-one"
-      (json \ "leadTimes" \ 0 \ "environment").as[String] mustBe "Production"
-      (json \ "leadTimes" \ 0 \ "days").as[Int] mustBe 2
+      Json.toJson(ServiceLeadTimes("test-service-one", Seq(sampleLeadTime))) mustBe expectedJson
     }
   }
 }
