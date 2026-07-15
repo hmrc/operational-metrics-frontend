@@ -18,8 +18,9 @@ package viewmodels
 
 import base.{BaseSpec, MetricsTestData}
 import models.ServiceLeadTimes
+import org.scalatest.LoneElement
 
-class ServiceLeadTimesViewModelSpec extends BaseSpec with MetricsTestData {
+class ServiceLeadTimesViewModelSpec extends BaseSpec with MetricsTestData with LoneElement {
 
   "ServiceLeadTimesViewModel.from" should {
 
@@ -30,14 +31,15 @@ class ServiceLeadTimesViewModelSpec extends BaseSpec with MetricsTestData {
           selectedTeam = None
         )
 
+      val row = result.rows.loneElement
+
       result.selectedTeam mustBe None
       result.teams mustBe Seq("PlatOps")
-      result.rows.size mustBe 1
-      result.rows.head.serviceName mustBe "test-service-one"
-      result.rows.head.team mustBe "PlatOps"
-      result.rows.head.environment mustBe "Production"
-      result.rows.head.version mustBe "1.2.3"
-      result.rows.head.days mustBe 2
+      row.serviceName mustBe "test-service-one"
+      row.team mustBe "PlatOps"
+      row.environment mustBe "Production"
+      row.version mustBe "1.2.3"
+      row.days mustBe 2
     }
 
     "expose all distinct teams in sorted order" in {
@@ -84,7 +86,7 @@ class ServiceLeadTimesViewModelSpec extends BaseSpec with MetricsTestData {
         )
 
       result.teams mustBe Seq("Unknown")
-      result.rows.head.team mustBe "Unknown"
+      result.rows.loneElement.team mustBe "Unknown"
     }
   }
 }

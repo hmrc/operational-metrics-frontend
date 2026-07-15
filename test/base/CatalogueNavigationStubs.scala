@@ -39,7 +39,15 @@ trait CatalogueNavigationStubs:
                 |    "external": false,
                 |    "_type": "TopMenu"
                 |  },
-                |  "topLevelLinks": [],
+                |  "topLevelLinks": [
+                |    {
+                |      "name": "Stub navigation item",
+                |      "id": "stub-navigation-item",
+                |      "href": "/stub-navigation-item",
+                |      "external": false,
+                |      "_type": "TopMenu"
+                |    }
+                |  ],
                 |  "dropdowns": []
                 |}
                 |""".stripMargin

@@ -55,7 +55,7 @@ class ErrorHandlerSpec
           .futureValue
 
         result.body must include("<!DOCTYPE html>")
-        result.body must include("MDTP")
+        result.body must include("Stub navigation item")
         result.body must include("error.heading")
 
         verify(getRequestedFor(urlEqualTo("/catalogue-config/menu-bar/menu")))
@@ -76,6 +76,8 @@ class ErrorHandlerSpec
           .futureValue
 
         result.body must include("<!DOCTYPE html>")
+        result.body must include("MDTP")
+        result.body must not include "Stub navigation item"
         result.body must include("error.heading")
 
         verify(getRequestedFor(urlEqualTo("/catalogue-config/menu-bar/menu")))
