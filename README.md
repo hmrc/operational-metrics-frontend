@@ -110,6 +110,32 @@ The following Internal Auth configuration is required for local development:
 The protected application route requires the `READ` action for resource type
 `operational-metrics-frontend` at resource location `*`.
 
+### Catalogue menu permissions
+
+The `READ` permission above is still required to load the Operational Metrics
+page and table. Catalogue menu permissions are additional grants and must not
+replace it.
+
+To display permission-sensitive entries in the Users menu, add the relevant
+permissions to the same Internal Auth principal:
+
+| Resource Type        | Resource Locations | Action        | Menu entries enabled                            |
+| -------------------- | ------------------ | ------------- | ----------------------------------------------- |
+| `catalogue-frontend` | `*`                | `CREATE_USER` | Create a User; Create a Service User             |
+| `catalogue-frontend` | `*`                | `MANAGE_USER` | Offboard Users                                   |
+
+For example, a local principal that can view Operational Metrics and create
+users needs both of these grants:
+
+| Resource Type                  | Resource Locations | Action        |
+| ------------------------------ | ------------------ | ------------- |
+| `operational-metrics-frontend` | `*`                | `READ`        |
+| `catalogue-frontend`           | `*`                | `CREATE_USER` |
+
+A principal with `READ` only can still load the page and receives the direct
+Users link, but no Users dropdown. A principal with both Catalogue actions
+receives all three Users dropdown entries.
+
 ## Tests
 
 Please run the tests with any code changes:
