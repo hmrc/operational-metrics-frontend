@@ -55,17 +55,17 @@ cd ../catalogue-wrapper
 sbt publishLocal
 ```
 
-Start the frontend on port `9001` so that it matches the Internal Auth redirect
+Start the frontend on port `9049` so that it matches the Internal Auth redirect
 URL documented below:
 
 ```bash
-sbt "run 9001"
+sbt "run 9049"
 ```
 
 The application is then available at:
 
 ```text
-http://localhost:9001/operational-metrics-frontend
+http://localhost:9049/operational-metrics-frontend
 ```
 
 ## Development
@@ -102,7 +102,7 @@ The following Internal Auth configuration is required for local development:
 | Field              | Contents                                                                                                         |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------- |
 | Principal          | `operational-metrics-frontend`                                                                                   |
-| Redirect URL       | `http://localhost:9001/operational-metrics-frontend/auth/post-sign-in?targetUrl=%2Foperational-metrics-frontend` |
+| Redirect URL       | `http://localhost:9049/operational-metrics-frontend/auth/post-sign-in?targetUrl=%2Foperational-metrics-frontend` |
 | Resource Type      | `operational-metrics-frontend`                                                                                   |
 | Resource Locations | `*`                                                                                                              |
 | Action             | `READ`                                                                                                           |

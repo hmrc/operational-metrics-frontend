@@ -40,3 +40,4 @@ project/.bloop
 .vscode
 .bsp
 project/metals.sbt
+.scalafmt.*

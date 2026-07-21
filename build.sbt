@@ -15,6 +15,7 @@ lazy val microservice = (project in file("."))
   ) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(inConfig(Test)(testSettings): _*)
   .settings(ThisBuild / useSuperShell := false)
+  .settings(PlayKeys.playDefaultPort := 9049)
   .settings(
     name := appName,
     RoutesKeys.routesImport ++= Seq(
