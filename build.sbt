@@ -10,9 +10,12 @@ ThisBuild / scalaVersion := "3.3.5"
 
 lazy val microservice = (project in file("."))
   .enablePlugins(PlayScala, SbtDistributablesPlugin)
-  .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
+  .disablePlugins(
+    JUnitXmlReportPlugin
+  ) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(inConfig(Test)(testSettings): _*)
   .settings(ThisBuild / useSuperShell := false)
+  .settings(PlayKeys.playDefaultPort := 9049)
   .settings(
     name := appName,
     RoutesKeys.routesImport ++= Seq(
@@ -47,12 +50,7 @@ lazy val microservice = (project in file("."))
     Assets / pipelineStages := Seq(concat)
   )
 
-lazy val testSettings: Seq[Def.Setting[_]] = Seq(
+lazy val testSettings: Seq[Def.Setting[?]] = Seq(
   fork := true,
   unmanagedSourceDirectories += baseDirectory.value / "test-utils"
 )
-
-lazy val it =
-  (project in file("it"))
-    .enablePlugins(PlayScala)
-    .dependsOn(microservice % "test->test")

@@ -33,7 +33,11 @@ bin
 /*.ipr
 /.classpath
 *.iws
+.direnv
+.bloop
+project/.bloop
 .metals
 .vscode
 .bsp
 project/metals.sbt
+.scalafmt.*
