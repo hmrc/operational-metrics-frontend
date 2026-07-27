@@ -34,9 +34,9 @@ class ErrorHandlerSpec
   private def applicationWithMenuBar() =
     applicationBuilder()
       .configure(
-        "microservice.services.menu-bar.protocol" -> "http",
-        "microservice.services.menu-bar.host"     -> wireMockHost,
-        "microservice.services.menu-bar.port"     -> wireMockPort
+        "microservice.services.catalogue-config.protocol" -> "http",
+        "microservice.services.catalogue-config.host"     -> wireMockHost,
+        "microservice.services.catalogue-config.port"     -> wireMockPort
       )
       .build()
 
@@ -58,8 +58,8 @@ class ErrorHandlerSpec
         result.body must include("Stub navigation item")
         result.body must include("error.heading")
 
-        verify(getRequestedFor(urlEqualTo("/catalogue-config/menu-bar/menu")))
-        verify(getRequestedFor(urlEqualTo("/catalogue-config/menu-bar/search-index")))
+        verify(getRequestedFor(urlEqualTo("/catalogue-config/menu")))
+        verify(getRequestedFor(urlEqualTo("/catalogue-config/search-index")))
       }
     }
 
@@ -80,8 +80,8 @@ class ErrorHandlerSpec
         result.body must not include "Stub navigation item"
         result.body must include("error.heading")
 
-        verify(getRequestedFor(urlEqualTo("/catalogue-config/menu-bar/menu")))
-        verify(getRequestedFor(urlEqualTo("/catalogue-config/menu-bar/search-index")))
+        verify(getRequestedFor(urlEqualTo("/catalogue-config/menu")))
+        verify(getRequestedFor(urlEqualTo("/catalogue-config/search-index")))
       }
     }
   }
