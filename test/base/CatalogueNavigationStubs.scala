@@ -24,7 +24,7 @@ trait CatalogueNavigationStubs:
 
   protected def stubNavigation(): Unit =
     stubFor(
-      get(urlEqualTo("/catalogue-config/menu-bar/menu"))
+      get(urlEqualTo("/catalogue-config/menu"))
         .willReturn(
           aResponse()
             .withStatus(200)
@@ -56,7 +56,7 @@ trait CatalogueNavigationStubs:
     )
 
     stubFor(
-      get(urlEqualTo("/catalogue-config/menu-bar/search-index"))
+      get(urlEqualTo("/catalogue-config/search-index"))
         .willReturn(
           aResponse()
             .withStatus(200)
@@ -67,11 +67,11 @@ trait CatalogueNavigationStubs:
 
   protected def stubNavigationUnavailable(): Unit =
     stubFor(
-      get(urlEqualTo("/catalogue-config/menu-bar/menu"))
+      get(urlEqualTo("/catalogue-config/menu"))
         .willReturn(aResponse().withStatus(503))
     )
 
     stubFor(
-      get(urlEqualTo("/catalogue-config/menu-bar/search-index"))
+      get(urlEqualTo("/catalogue-config/search-index"))
         .willReturn(aResponse().withStatus(503))
     )
