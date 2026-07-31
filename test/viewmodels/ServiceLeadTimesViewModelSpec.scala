@@ -180,6 +180,17 @@ class ServiceLeadTimesViewModelSpec extends BaseSpec with MetricsTestData with L
       result.rows.loneElement.teams mustBe Seq("Unknown")
     }
 
+    "trim surrounding whitespace from team names before deduplication" in {
+      val result =
+        ServiceLeadTimesViewModel.from(
+          serviceLeadTimes = Seq(ServiceLeadTimes("test-service-one", Seq(sampleLeadTime))),
+          repositoryOwnership = Map("test-service-one" -> Seq("PlatOps", " PlatOps ")),
+          selectedTeam = None
+        )
+
+      result.rows.loneElement.teams mustBe Seq("PlatOps")
+    }
+
     "include all distinct owning teams in the filter options" in {
       val ownership =
         Map(

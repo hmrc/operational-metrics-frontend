@@ -154,6 +154,31 @@ class TeamsAndRepositoriesConnectorSpec
       result mustBe Map("service-one" -> Seq("MDTP", "Platform Engineering", "PlatOps"))
     }
 
+    "trim surrounding whitespace from team names before deduplication" in {
+      stubFor(
+        get(urlEqualTo("/api/v2/repositories"))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+              .withHeader("Content-Type", "application/json")
+              .withBody(
+                """
+                  |[
+                  |  {
+                  |    "name": "service-one",
+                  |    "owningTeams": ["PlatOps", " PlatOps "]
+                  |  }
+                  |]
+                  |""".stripMargin
+              )
+          )
+      )
+
+      val result = connector.getRepositoryOwnership().futureValue
+
+      result mustBe Map("service-one" -> Seq("PlatOps"))
+    }
+
     "propagate non-success HTTP responses as a failed Future" in {
       stubFor(
         get(urlEqualTo("/api/v2/repositories"))

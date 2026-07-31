@@ -49,9 +49,10 @@ object ServiceLeadTimesViewModel {
         val owners =
           repositoryOwnership
             .getOrElse(service.serviceName, Seq.empty)
-            .filter(_.trim.nonEmpty)
+            .map(_.trim)
+            .filter(_.nonEmpty)
             .distinct
-            .sortBy(_.toLowerCase)
+            .sortBy(_.toLowerCase(java.util.Locale.ROOT))
 
         val teams = if (owners.isEmpty) Seq("Unknown") else owners
 
@@ -72,7 +73,7 @@ object ServiceLeadTimesViewModel {
       allRows
         .flatMap(_.teams)
         .distinct
-        .sortBy(_.toLowerCase)
+        .sortBy(_.toLowerCase(java.util.Locale.ROOT))
 
     val filteredRows =
       selectedTeam
