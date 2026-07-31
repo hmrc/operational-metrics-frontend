@@ -40,7 +40,7 @@ class TeamsAndRepositoriesConnector @Inject() (
       .execute[Seq[RepositoryOwnership]]
       .map(
         _.map(repository =>
-          repository.name -> repository.owningTeams.filter(_.nonEmpty).distinct.sorted
+          repository.name -> repository.owningTeams.filter(_.trim.nonEmpty).distinct.sortBy(_.toLowerCase)
         ).toMap
       )
 }

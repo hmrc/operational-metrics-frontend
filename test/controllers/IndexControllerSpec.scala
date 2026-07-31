@@ -198,7 +198,9 @@ class IndexControllerSpec
         val result =
           route(application, request).value
 
-        status(result) mustBe INTERNAL_SERVER_ERROR
+        intercept[RuntimeException] {
+          status(result)
+        }.getMessage mustBe "operational-metrics unavailable"
       }
     }
   }
