@@ -30,6 +30,7 @@ import viewmodels.ServiceLeadTimesViewModel
 import views.html.IndexView
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
 
 class IndexController @Inject() (
     val controllerComponents: MessagesControllerComponents,
@@ -58,8 +59,8 @@ class IndexController @Inject() (
       val repositoryOwnershipF =
         teamsAndRepositoriesConnector
           .getRepositoryOwnership()
-          .recover { case ex =>
-            logger.warn(s"Failed to fetch repository ownership from teams-and-repositories: ${ex.getMessage}")
+          .recover { case NonFatal(ex) =>
+            logger.warn("Failed to fetch repository ownership from teams-and-repositories", ex)
             Map.empty[String, Seq[String]]
           }
 
