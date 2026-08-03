@@ -17,7 +17,7 @@
 package controllers
 
 import base.{ApplicationTestSupport, BaseSpec, CatalogueNavigationStubs, MetricsTestData}
-import connector.OperationalMetricsConnector
+import connector.{OperationalMetricsConnector, TeamsAndRepositoriesConnector}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -37,33 +37,44 @@ class IndexControllerSpec
     with WireMockSupport
     with CatalogueNavigationStubs:
 
+  private val sampleOwnership: Map[String, Seq[String]] =
+    Map(
+      "test-service-one" -> Seq("PlatOps"),
+      "test-service-two" -> Seq("MDTP")
+    )
+
   private def applicationWith(
-      mockOperationalMetricsConnector: OperationalMetricsConnector
+      mockOperationalMetricsConnector: OperationalMetricsConnector,
+      mockTeamsAndRepositoriesConnector: TeamsAndRepositoriesConnector
   ) =
     applicationBuilder()
       .configure(
         "microservice.services.menu-bar.protocol" -> "http",
-        "microservice.services.menu-bar.host" -> wireMockHost,
-        "microservice.services.menu-bar.port" -> wireMockPort
+        "microservice.services.menu-bar.host"     -> wireMockHost,
+        "microservice.services.menu-bar.port"     -> wireMockPort
       )
       .overrides(
-        bind[OperationalMetricsConnector].toInstance(mockOperationalMetricsConnector)
+        bind[OperationalMetricsConnector].toInstance(mockOperationalMetricsConnector),
+        bind[TeamsAndRepositoriesConnector].toInstance(mockTeamsAndRepositoriesConnector)
       )
       .build()
 
   "IndexController.onPageLoad" should {
 
-    "return OK and render service lead time data" in {
-      val mockOperationalMetricsConnector =
-        mock[OperationalMetricsConnector]
+    "return OK and render service lead time data with ownership" in {
+      val mockOperationalMetricsConnector = mock[OperationalMetricsConnector]
+      val mockTeamsAndRepositoriesConnector = mock[TeamsAndRepositoriesConnector]
 
       when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier]))
         .thenReturn(Future.successful(serviceLeadTimes))
 
+      when(mockTeamsAndRepositoriesConnector.getRepositoryOwnership()(any[HeaderCarrier]))
+        .thenReturn(Future.successful(sampleOwnership))
+
       stubNavigation()
 
       val application =
-        applicationWith(mockOperationalMetricsConnector)
+        applicationWith(mockOperationalMetricsConnector, mockTeamsAndRepositoriesConnector)
 
       running(application) {
         val request =
@@ -80,17 +91,48 @@ class IndexControllerSpec
       }
     }
 
-    "pass the selected team query parameter into the view model" in {
-      val mockOperationalMetricsConnector =
-        mock[OperationalMetricsConnector]
+    "render multiple owning teams for a service" in {
+      val mockOperationalMetricsConnector = mock[OperationalMetricsConnector]
+      val mockTeamsAndRepositoriesConnector = mock[TeamsAndRepositoriesConnector]
 
       when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier]))
         .thenReturn(Future.successful(serviceLeadTimes))
 
+      when(mockTeamsAndRepositoriesConnector.getRepositoryOwnership()(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Map("test-service-one" -> Seq("Platform Engineering", "PlatOps"))))
+
       stubNavigation()
 
       val application =
-        applicationWith(mockOperationalMetricsConnector)
+        applicationWith(mockOperationalMetricsConnector, mockTeamsAndRepositoriesConnector)
+
+      running(application) {
+        val request =
+          FakeRequest(GET, routes.IndexController.onPageLoad().url)
+
+        val result =
+          route(application, request).value
+
+        status(result) mustBe OK
+        contentAsString(result) must include("Platform Engineering")
+        contentAsString(result) must include("PlatOps")
+      }
+    }
+
+    "pass the selected team query parameter into the view model" in {
+      val mockOperationalMetricsConnector = mock[OperationalMetricsConnector]
+      val mockTeamsAndRepositoriesConnector = mock[TeamsAndRepositoriesConnector]
+
+      when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier]))
+        .thenReturn(Future.successful(serviceLeadTimes))
+
+      when(mockTeamsAndRepositoriesConnector.getRepositoryOwnership()(any[HeaderCarrier]))
+        .thenReturn(Future.successful(sampleOwnership))
+
+      stubNavigation()
+
+      val application =
+        applicationWith(mockOperationalMetricsConnector, mockTeamsAndRepositoriesConnector)
 
       running(application) {
         val request =
@@ -105,4 +147,61 @@ class IndexControllerSpec
         contentAsString(result) must include(controllers.auth.routes.AuthController.signOut().url)
       }
     }
+
+    "return OK and show Unknown when teams-and-repositories fails" in {
+      val mockOperationalMetricsConnector = mock[OperationalMetricsConnector]
+      val mockTeamsAndRepositoriesConnector = mock[TeamsAndRepositoriesConnector]
+
+      when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier]))
+        .thenReturn(Future.successful(serviceLeadTimes))
+
+      when(mockTeamsAndRepositoriesConnector.getRepositoryOwnership()(any[HeaderCarrier]))
+        .thenReturn(Future.failed(new RuntimeException("teams-and-repositories unavailable")))
+
+      stubNavigation()
+
+      val application =
+        applicationWith(mockOperationalMetricsConnector, mockTeamsAndRepositoriesConnector)
+
+      running(application) {
+        val request =
+          FakeRequest(GET, routes.IndexController.onPageLoad().url)
+
+        val result =
+          route(application, request).value
+
+        status(result) mustBe OK
+        contentAsString(result) must include("Unknown")
+        contentAsString(result) must include("test-service-one")
+      }
+    }
+
+    "propagate failures from operational-metrics as a failed response" in {
+      val mockOperationalMetricsConnector = mock[OperationalMetricsConnector]
+      val mockTeamsAndRepositoriesConnector = mock[TeamsAndRepositoriesConnector]
+
+      when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier]))
+        .thenReturn(Future.failed(new RuntimeException("operational-metrics unavailable")))
+
+      when(mockTeamsAndRepositoriesConnector.getRepositoryOwnership()(any[HeaderCarrier]))
+        .thenReturn(Future.successful(sampleOwnership))
+
+      stubNavigation()
+
+      val application =
+        applicationWith(mockOperationalMetricsConnector, mockTeamsAndRepositoriesConnector)
+
+      running(application) {
+        val request =
+          FakeRequest(GET, routes.IndexController.onPageLoad().url)
+
+        val result =
+          route(application, request).value
+
+        intercept[RuntimeException] {
+          status(result)
+        }.getMessage mustBe "operational-metrics unavailable"
+      }
+    }
   }
+

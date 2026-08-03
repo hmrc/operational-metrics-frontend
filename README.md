@@ -40,11 +40,12 @@ direnv allow
 
 The default local configuration expects the following services:
 
-| Service               | Port | Purpose                                             |
-| --------------------- | ---: | --------------------------------------------------- |
-| `operational-metrics` | 8863 | Supplies service lead-time data                     |
-| `menu-bar`            | 9999 | Supplies Catalogue navigation and quick-search data |
-| `internal-auth`       | 8470 | Authorises access to the frontend                   |
+| Service                    | Port | Purpose                                             |
+| -------------------------- | ---: | --------------------------------------------------- |
+| `operational-metrics`      | 8863 | Supplies service lead-time data                     |
+| `teams-and-repositories`   | 9015 | Supplies repository ownership (owning teams)        |
+| `menu-bar`                 | 9999 | Supplies Catalogue navigation and quick-search data |
+| `internal-auth`            | 8470 | Authorises access to the frontend                   |
 
 The project currently depends on the local snapshot version of
 `catalogue-wrapper-play-30`. Publish the wrapper locally before compiling this
@@ -84,10 +85,6 @@ GET /operational-metrics/service-lead-times
 
 Configuration for local service ports and Catalogue wrapper routes is held in
 `conf/application.conf`.
-
-The current service-to-team mapping is temporary and is defined in
-`ServiceLeadTimesViewModel`. It should be replaced with Catalogue or
-teams-and-repositories data when that integration is available.
 
 Compile the application with:
 

@@ -28,7 +28,7 @@ final case class ServiceLeadTimesViewModel(
 
 final case class ServiceLeadTimeRow(
     serviceName: String,
-    team: String,
+    teams: Seq[String],
     environment: String,
     version: String,
     slugCreatedAt: Instant,
@@ -38,27 +38,28 @@ final case class ServiceLeadTimeRow(
 
 object ServiceLeadTimesViewModel {
 
-  // Temporary only. Replace this with Catalogue / teams-and-repositories data later.
-  private val temporaryServiceTeams: Map[String, String] =
-    Map(
-      "test-service-one" -> "PlatOps",
-      "test-service-two" -> "MDTP"
-    )
-
   def from(
       serviceLeadTimes: Seq[ServiceLeadTimes],
+      repositoryOwnership: Map[String, Seq[String]],
       selectedTeam: Option[String]
   ): ServiceLeadTimesViewModel = {
 
     val allRows =
       serviceLeadTimes.flatMap { service =>
-        val team =
-          temporaryServiceTeams.getOrElse(service.serviceName, "Unknown")
+        val owners =
+          repositoryOwnership
+            .getOrElse(service.serviceName, Seq.empty)
+            .map(_.trim)
+            .filter(_.nonEmpty)
+            .distinct
+            .sortBy(_.toLowerCase(java.util.Locale.ROOT))
+
+        val teams = if (owners.isEmpty) Seq("Unknown") else owners
 
         service.leadTimes.map { leadTime =>
           ServiceLeadTimeRow(
             serviceName = service.serviceName,
-            team = team,
+            teams = teams,
             environment = leadTime.environment,
             version = leadTime.version,
             slugCreatedAt = leadTime.slugCreatedAt,
@@ -70,19 +71,19 @@ object ServiceLeadTimesViewModel {
 
     val teams =
       allRows
-        .map(_.team)
+        .flatMap(_.teams)
         .distinct
-        .sorted
+        .sortBy(_.toLowerCase(java.util.Locale.ROOT))
 
     val filteredRows =
       selectedTeam
         .filter(_.nonEmpty)
-        .fold(allRows)(team => allRows.filter(_.team == team))
+        .fold(allRows)(team => allRows.filter(_.teams.contains(team)))
 
     ServiceLeadTimesViewModel(
       selectedTeam = selectedTeam.filter(_.nonEmpty),
       teams = teams,
-      rows = filteredRows.sortBy(row => (row.team, row.serviceName, row.environment, row.version))
+      rows = filteredRows.sortBy(row => (row.teams.headOption.getOrElse(""), row.serviceName, row.environment, row.version))
     )
   }
 }

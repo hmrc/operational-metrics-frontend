@@ -16,9 +16,10 @@
 
 package controllers
 
-import connector.OperationalMetricsConnector
+import connector.{OperationalMetricsConnector, TeamsAndRepositoriesConnector}
 import controllers.actions.InternalAuthAction
 import javax.inject.Inject
+import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cataloguewrapper.services.CatalogueWrapperService
@@ -28,17 +29,21 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import viewmodels.ServiceLeadTimesViewModel
 import views.html.IndexView
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
 
 class IndexController @Inject() (
     val controllerComponents: MessagesControllerComponents,
     internalAuth: InternalAuthAction,
     operationalMetricsConnector: OperationalMetricsConnector,
+    teamsAndRepositoriesConnector: TeamsAndRepositoriesConnector,
     catalogueWrapperService: CatalogueWrapperService,
     view: IndexView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
+
+  private val logger = Logger(getClass)
 
   def onPageLoad(): Action[AnyContent] =
     internalAuth.async { implicit request =>
@@ -48,9 +53,21 @@ class IndexController @Inject() (
       val selectedTeam: Option[String] =
         request.getQueryString("team").filter(_.nonEmpty)
 
+      val serviceLeadTimesF =
+        operationalMetricsConnector.getServiceLeadTimes()
+
+      val repositoryOwnershipF =
+        teamsAndRepositoriesConnector
+          .getRepositoryOwnership()
+          .recover { case NonFatal(ex) =>
+            logger.warn("Failed to fetch repository ownership from teams-and-repositories", ex)
+            Map.empty[String, Seq[String]]
+          }
+
       for {
-        serviceLeadTimes <- operationalMetricsConnector.getServiceLeadTimes()
-        pageContent = view(ServiceLeadTimesViewModel.from(serviceLeadTimes, selectedTeam))
+        serviceLeadTimes    <- serviceLeadTimesF
+        repositoryOwnership <- repositoryOwnershipF
+        pageContent = view(ServiceLeadTimesViewModel.from(serviceLeadTimes, repositoryOwnership, selectedTeam))
         html <- catalogueWrapperService.standardCatalogueLayout(
           content = pageContent,
           pageTitle = Some("Operational Metrics"),
