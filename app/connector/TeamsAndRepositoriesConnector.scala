@@ -17,30 +17,46 @@
 package connector
 
 import models.RepositoryOwnership
+import play.api.cache.AsyncCacheApi
+import play.api.{Configuration, Logging}
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.duration.*
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TeamsAndRepositoriesConnector @Inject() (
     httpClient: HttpClientV2,
-    servicesConfig: ServicesConfig
-)(implicit ec: ExecutionContext) {
+    servicesConfig: ServicesConfig,
+    cache: AsyncCacheApi,
+    configuration: Configuration
+)(implicit ec: ExecutionContext) extends Logging {
 
   private val baseUrl: String =
     servicesConfig.baseUrl("teams-and-repositories")
 
+  private val ownershipCacheKey = "teams-and-repositories.repository-ownership"
+
+  private val ownershipCacheTtl: FiniteDuration =
+    configuration
+      .getOptional[scala.concurrent.duration.Duration]("cache.repository-ownership.ttl")
+      .collect { case d: FiniteDuration => d }
+      .getOrElse(2.minutes)
+
   def getRepositoryOwnership()(implicit hc: HeaderCarrier): Future[Map[String, Seq[String]]] =
-    httpClient
-      .get(url"$baseUrl/api/v2/repositories")
-      .execute[Seq[RepositoryOwnership]]
-      .map(
-        _.map(repository =>
-          repository.name -> repository.owningTeams.map(_.trim).filter(_.nonEmpty).distinct.sortBy(_.toLowerCase(java.util.Locale.ROOT))
-        ).toMap
-      )
+    cache.getOrElseUpdate(ownershipCacheKey, ownershipCacheTtl) {
+      logger.info(s"Fetching repository ownership from teams-and-repositories (cache miss)")
+      httpClient
+        .get(url"$baseUrl/api/v2/repositories")
+        .execute[Seq[RepositoryOwnership]]
+        .map(
+          _.map(repository =>
+            repository.name -> repository.owningTeams.map(_.trim).filter(_.nonEmpty).distinct.sortBy(_.toLowerCase(java.util.Locale.ROOT))
+          ).toMap
+        )
+    }
 }
