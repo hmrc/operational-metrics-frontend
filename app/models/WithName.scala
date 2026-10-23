@@ -16,6 +16,5 @@
 
 package models
 
-class WithName(string: String) {
+class WithName(string: String):
   override val toString: String = string
-}

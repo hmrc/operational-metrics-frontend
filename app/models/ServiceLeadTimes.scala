@@ -22,23 +22,21 @@ import java.time.Instant
 
 final case class ServiceLeadTimes(
     serviceName: String,
-    leadTimes: Seq[LeadTimeMeasurement]
+    leadTimes  : Seq[LeadTimeMeasurement]
 )
 
-object ServiceLeadTimes {
+object ServiceLeadTimes:
   implicit val format: OFormat[ServiceLeadTimes] =
     Json.format[ServiceLeadTimes]
-}
 
 final case class LeadTimeMeasurement(
-    environment: String,
-    version: String,
-    slugCreatedAt: Instant,
+    environment    : String,
+    version        : String,
+    slugCreatedAt  : Instant,
     firstDeployedAt: Instant,
-    days: Int
+    days           : Int
 )
 
-object LeadTimeMeasurement {
+object LeadTimeMeasurement:
   implicit val format: OFormat[LeadTimeMeasurement] =
     Json.format[LeadTimeMeasurement]
-}

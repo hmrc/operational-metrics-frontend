@@ -25,6 +25,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.test.{HttpClientV2Support, WireMockSupport}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class OperationalMetricsConnectorSpec
     extends BaseSpec
     with ScalaFutures
@@ -48,9 +50,9 @@ class OperationalMetricsConnectorSpec
     new OperationalMetricsConnector(
       httpClient = httpClientV2,
       servicesConfig = servicesConfig
-    )(scala.concurrent.ExecutionContext.global)
+    )
 
-  private implicit val hc: HeaderCarrier = HeaderCarrier()
+  private given HeaderCarrier = HeaderCarrier()
 
   "getServiceLeadTimes" should {
 

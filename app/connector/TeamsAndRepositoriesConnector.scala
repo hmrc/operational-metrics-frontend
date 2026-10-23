@@ -29,18 +29,16 @@ import scala.concurrent.{ExecutionContext, Future}
 class TeamsAndRepositoriesConnector @Inject() (
     httpClient: HttpClientV2,
     servicesConfig: ServicesConfig
-)(implicit ec: ExecutionContext) {
+)(using ExecutionContext):
 
   private val baseUrl: String =
     servicesConfig.baseUrl("teams-and-repositories")
 
-  def getRepositoryOwnership()(implicit hc: HeaderCarrier): Future[Map[String, Seq[String]]] =
+  def getRepositoryOwnership()(using HeaderCarrier): Future[Map[String, Seq[String]]] =
     httpClient
       .get(url"$baseUrl/api/v2/repositories")
       .execute[Seq[RepositoryOwnership]]
-      .map(
-        _.map(repository =>
+      .map:
+        _.map: repository =>
           repository.name -> repository.owningTeams.map(_.trim).filter(_.nonEmpty).distinct.sortBy(_.toLowerCase(java.util.Locale.ROOT))
-        ).toMap
-      )
-}
+        .toMap

@@ -23,6 +23,7 @@ import play.api.Configuration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.test.{HttpClientV2Support, WireMockSupport}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class TeamsAndRepositoriesConnectorSpec
     extends BaseSpec
@@ -44,9 +45,9 @@ class TeamsAndRepositoriesConnectorSpec
 
   private val connector =
     new TeamsAndRepositoriesConnector(
-      httpClient = httpClientV2,
+      httpClient     = httpClientV2,
       servicesConfig = servicesConfig
-    )(scala.concurrent.ExecutionContext.global)
+    )
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
 
