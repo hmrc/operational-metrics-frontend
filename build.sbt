@@ -6,7 +6,7 @@ import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 lazy val appName: String = "operational-metrics-frontend"
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "3.3.5"
+ThisBuild / scalaVersion := "3.3.8"
 
 lazy val microservice = (project in file("."))
   .enablePlugins(PlayScala, SbtDistributablesPlugin)
@@ -15,7 +15,7 @@ lazy val microservice = (project in file("."))
   ) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(inConfig(Test)(testSettings): _*)
   .settings(ThisBuild / useSuperShell := false)
-  .settings(PlayKeys.playDefaultPort := 9049)
+  .settings(PlayKeys.playDefaultPort := 8864)
   .settings(
     name := appName,
     RoutesKeys.routesImport ++= Seq(

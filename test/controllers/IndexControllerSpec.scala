@@ -65,10 +65,10 @@ class IndexControllerSpec
       val mockOperationalMetricsConnector = mock[OperationalMetricsConnector]
       val mockTeamsAndRepositoriesConnector = mock[TeamsAndRepositoriesConnector]
 
-      when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier]))
+      when(mockOperationalMetricsConnector.getServiceLeadTimes()(using any[HeaderCarrier]))
         .thenReturn(Future.successful(serviceLeadTimes))
 
-      when(mockTeamsAndRepositoriesConnector.getRepositoryOwnership()(any[HeaderCarrier]))
+      when(mockTeamsAndRepositoriesConnector.getRepositoryOwnership()(using any[HeaderCarrier]))
         .thenReturn(Future.successful(sampleOwnership))
 
       stubNavigation()
@@ -87,7 +87,6 @@ class IndexControllerSpec
         contentAsString(result) must include("Operational Metrics")
         contentAsString(result) must include("test-service-one")
         contentAsString(result) must include("test-service-two")
-        contentAsString(result) must include(controllers.auth.routes.AuthController.signOut().url)
       }
     }
 
@@ -95,10 +94,10 @@ class IndexControllerSpec
       val mockOperationalMetricsConnector = mock[OperationalMetricsConnector]
       val mockTeamsAndRepositoriesConnector = mock[TeamsAndRepositoriesConnector]
 
-      when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier]))
+      when(mockOperationalMetricsConnector.getServiceLeadTimes()(using any[HeaderCarrier]))
         .thenReturn(Future.successful(serviceLeadTimes))
 
-      when(mockTeamsAndRepositoriesConnector.getRepositoryOwnership()(any[HeaderCarrier]))
+      when(mockTeamsAndRepositoriesConnector.getRepositoryOwnership()(using any[HeaderCarrier]))
         .thenReturn(Future.successful(Map("test-service-one" -> Seq("Platform Engineering", "PlatOps"))))
 
       stubNavigation()
@@ -123,10 +122,10 @@ class IndexControllerSpec
       val mockOperationalMetricsConnector = mock[OperationalMetricsConnector]
       val mockTeamsAndRepositoriesConnector = mock[TeamsAndRepositoriesConnector]
 
-      when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier]))
+      when(mockOperationalMetricsConnector.getServiceLeadTimes()(using any[HeaderCarrier]))
         .thenReturn(Future.successful(serviceLeadTimes))
 
-      when(mockTeamsAndRepositoriesConnector.getRepositoryOwnership()(any[HeaderCarrier]))
+      when(mockTeamsAndRepositoriesConnector.getRepositoryOwnership()(using any[HeaderCarrier]))
         .thenReturn(Future.successful(sampleOwnership))
 
       stubNavigation()
@@ -144,7 +143,6 @@ class IndexControllerSpec
         status(result) mustBe OK
         contentAsString(result) must include("test-service-one")
         contentAsString(result) must not include "test-service-two"
-        contentAsString(result) must include(controllers.auth.routes.AuthController.signOut().url)
       }
     }
 
@@ -152,10 +150,10 @@ class IndexControllerSpec
       val mockOperationalMetricsConnector = mock[OperationalMetricsConnector]
       val mockTeamsAndRepositoriesConnector = mock[TeamsAndRepositoriesConnector]
 
-      when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier]))
+      when(mockOperationalMetricsConnector.getServiceLeadTimes()(using any[HeaderCarrier]))
         .thenReturn(Future.successful(serviceLeadTimes))
 
-      when(mockTeamsAndRepositoriesConnector.getRepositoryOwnership()(any[HeaderCarrier]))
+      when(mockTeamsAndRepositoriesConnector.getRepositoryOwnership()(using any[HeaderCarrier]))
         .thenReturn(Future.failed(new RuntimeException("teams-and-repositories unavailable")))
 
       stubNavigation()
@@ -180,10 +178,10 @@ class IndexControllerSpec
       val mockOperationalMetricsConnector = mock[OperationalMetricsConnector]
       val mockTeamsAndRepositoriesConnector = mock[TeamsAndRepositoriesConnector]
 
-      when(mockOperationalMetricsConnector.getServiceLeadTimes()(any[HeaderCarrier]))
+      when(mockOperationalMetricsConnector.getServiceLeadTimes()(using any[HeaderCarrier]))
         .thenReturn(Future.failed(new RuntimeException("operational-metrics unavailable")))
 
-      when(mockTeamsAndRepositoriesConnector.getRepositoryOwnership()(any[HeaderCarrier]))
+      when(mockTeamsAndRepositoriesConnector.getRepositoryOwnership()(using any[HeaderCarrier]))
         .thenReturn(Future.successful(sampleOwnership))
 
       stubNavigation()

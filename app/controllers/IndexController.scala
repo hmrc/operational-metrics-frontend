@@ -23,60 +23,52 @@ import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cataloguewrapper.services.CatalogueWrapperService
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import viewmodels.ServiceLeadTimesViewModel
 import views.html.IndexView
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 
 class IndexController @Inject() (
-    val controllerComponents: MessagesControllerComponents,
-    internalAuth: InternalAuthAction,
-    operationalMetricsConnector: OperationalMetricsConnector,
+    val controllerComponents     : MessagesControllerComponents,
+    internalAuth                 : InternalAuthAction,
+    operationalMetricsConnector  : OperationalMetricsConnector,
     teamsAndRepositoriesConnector: TeamsAndRepositoriesConnector,
-    catalogueWrapperService: CatalogueWrapperService,
-    view: IndexView
-)(implicit ec: ExecutionContext)
+    catalogueWrapperService      : CatalogueWrapperService,
+    view                         : IndexView
+)(using ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport:
 
   private val logger = Logger(getClass)
 
   def onPageLoad(): Action[AnyContent] =
-    internalAuth.async { implicit request =>
-      implicit val hc: HeaderCarrier =
-        HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+    internalAuth.async:
+      implicit request =>
+        val selectedTeam: Option[String] =
+          request.getQueryString("team").filter(_.nonEmpty)
 
-      val selectedTeam: Option[String] =
-        request.getQueryString("team").filter(_.nonEmpty)
+        val serviceLeadTimesF =
+          operationalMetricsConnector.getServiceLeadTimes()
 
-      val serviceLeadTimesF =
-        operationalMetricsConnector.getServiceLeadTimes()
+        val repositoryOwnershipF =
+          teamsAndRepositoriesConnector
+            .getRepositoryOwnership()
+            .recover:
+              case NonFatal(ex) =>
+                logger.warn("Failed to fetch repository ownership from teams-and-repositories", ex)
+                Map.empty[String, Seq[String]]
 
-      val repositoryOwnershipF =
-        teamsAndRepositoriesConnector
-          .getRepositoryOwnership()
-          .recover { case NonFatal(ex) =>
-            logger.warn("Failed to fetch repository ownership from teams-and-repositories", ex)
-            Map.empty[String, Seq[String]]
-          }
-
-      for {
-        serviceLeadTimes    <- serviceLeadTimesF
-        repositoryOwnership <- repositoryOwnershipF
-        pageContent = view(ServiceLeadTimesViewModel.from(serviceLeadTimes, repositoryOwnership, selectedTeam))
-        html <- catalogueWrapperService.standardCatalogueLayout(
-          content = pageContent,
-          pageTitle = Some("Operational Metrics"),
-          activeItemId = Some("operational-metrics"),
-          fullWidth = false,
-          signOutUrl = Some(controllers.auth.routes.AuthController.signOut().url)
-        )
-      } yield {
-        Ok(html)
-      }
-    }
-}
+        for
+          serviceLeadTimes    <- serviceLeadTimesF
+          repositoryOwnership <- repositoryOwnershipF
+          pageContent         =  view(ServiceLeadTimesViewModel.from(serviceLeadTimes, repositoryOwnership, selectedTeam))
+          html                <- catalogueWrapperService.standardCatalogueLayout(
+                                   content      = pageContent,
+                                   pageTitle    = Some("Operational Metrics"),
+                                   activeItemId = Some("operational-metrics"),
+                                   fullWidth    = false
+                                 )
+        yield
+          Ok(html)

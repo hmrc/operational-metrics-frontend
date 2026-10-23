@@ -29,13 +29,12 @@ import scala.concurrent.{ExecutionContext, Future}
 class OperationalMetricsConnector @Inject() (
     httpClient: HttpClientV2,
     servicesConfig: ServicesConfig
-)(implicit ec: ExecutionContext) {
+)(using ExecutionContext):
 
   private val baseUrl: String =
     servicesConfig.baseUrl("operational-metrics")
 
-  def getServiceLeadTimes()(implicit hc: HeaderCarrier): Future[Seq[ServiceLeadTimes]] =
+  def getServiceLeadTimes()(using HeaderCarrier): Future[Seq[ServiceLeadTimes]] =
     httpClient
       .get(url"$baseUrl/operational-metrics/service-lead-times")
       .execute[Seq[ServiceLeadTimes]]
-}

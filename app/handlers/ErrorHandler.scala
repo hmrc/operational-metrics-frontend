@@ -33,19 +33,19 @@ class ErrorHandler @Inject() (
     val messagesApi: MessagesApi,
     catalogueWrapperService: CatalogueWrapperService,
     view: ErrorTemplate
-)(override implicit val ec: ExecutionContext)
+)(using override val ec: ExecutionContext)
     extends FrontendErrorHandler
-    with I18nSupport {
+    with I18nSupport:
 
   override def standardErrorTemplate(
       pageTitle: String,
       heading: String,
       message: String
-  )(implicit rh: RequestHeader): Future[Html] = {
-    implicit val messages: Messages =
+  )(using rh:RequestHeader): Future[Html] =
+    given messages: Messages =
       messagesApi.preferred(rh)
 
-    implicit val hc: HeaderCarrier =
+    given HeaderCarrier =
       HeaderCarrierConverter.fromRequestAndSession(rh, rh.session)
 
     val content =
@@ -53,11 +53,8 @@ class ErrorHandler @Inject() (
 
     catalogueWrapperService
       .standardCatalogueLayout(
-        content = content,
-        pageTitle = Some(messages(pageTitle)),
+        content      = content,
+        pageTitle    = Some(messages(pageTitle)),
         activeItemId = None,
-        fullWidth = false,
-        signOutUrl = None
+        fullWidth    = false
       )
-  }
-}

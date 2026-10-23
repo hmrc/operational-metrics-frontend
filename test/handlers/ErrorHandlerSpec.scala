@@ -49,7 +49,7 @@ class ErrorHandlerSpec
 
       running(app) {
         val handler          = app.injector.instanceOf[ErrorHandler]
-        implicit val request = FakeRequest()
+        given FakeRequest[_] = FakeRequest()
         val result           = handler
           .standardErrorTemplate("error.heading", "error.heading", "error.message")
           .futureValue
@@ -70,7 +70,7 @@ class ErrorHandlerSpec
 
       running(app) {
         val handler          = app.injector.instanceOf[ErrorHandler]
-        implicit val request = FakeRequest()
+        given FakeRequest[_] = FakeRequest()
         val result           = handler
           .standardErrorTemplate("error.heading", "error.heading", "error.message")
           .futureValue

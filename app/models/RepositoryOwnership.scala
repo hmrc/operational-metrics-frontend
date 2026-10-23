@@ -19,11 +19,10 @@ package models
 import play.api.libs.json.{Json, Reads}
 
 final case class RepositoryOwnership(
-    name: String,
+    name       : String,
     owningTeams: Seq[String]
 )
 
-object RepositoryOwnership {
+object RepositoryOwnership:
   implicit val reads: Reads[RepositoryOwnership] =
     Json.reads[RepositoryOwnership]
-}

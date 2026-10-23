@@ -16,16 +16,8 @@
 
 package controllers.actions
 
-import controllers.auth.AuthController
 import play.api.mvc.*
-import uk.gov.hmrc.internalauth.client.{
-  FrontendAuthComponents,
-  IAAction,
-  Predicate,
-  Resource,
-  ResourceLocation,
-  ResourceType
-}
+import uk.gov.hmrc.internalauth.client.*
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,10 +27,10 @@ trait InternalAuthAction
     with ActionFunction[Request, Request]
 
 class DefaultInternalAuthAction @Inject() (
-    auth: FrontendAuthComponents,
+    auth      : FrontendAuthComponents,
     val parser: BodyParsers.Default
-)(implicit val executionContext: ExecutionContext)
-    extends InternalAuthAction {
+)(using val executionContext: ExecutionContext)
+    extends InternalAuthAction:
 
   import DefaultInternalAuthAction.*
 
@@ -48,16 +40,15 @@ class DefaultInternalAuthAction @Inject() (
   ): Future[Result] =
     auth
       .authorizedAction(
-        continueUrl = AuthController.continueUrl(Call("GET", request.uri)),
-        predicate = readPermission
+        continueUrl = Call("GET", request.uri),
+        predicate   = readPermission
       )
       .invokeBlock[A](
         request,
         authenticatedRequest => block(authenticatedRequest.request)
       )
-}
 
-object DefaultInternalAuthAction {
+object DefaultInternalAuthAction:
 
   val readPermission: Predicate =
     Predicate.Permission(
@@ -67,4 +58,3 @@ object DefaultInternalAuthAction {
       ),
       IAAction("READ")
     )
-}
